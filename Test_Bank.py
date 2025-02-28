@@ -42,7 +42,7 @@ import joblib
 import shap
 
 
-df=pd.read_csv('/Users/admin/Desktop/BANK_APP/bank.csv')
+df=pd.read_csv('bank.csv')
 
 dff = df.copy()
 dff = dff[dff['age'] < 75]
