@@ -304,13 +304,13 @@ with st.sidebar:
     selected = option_menu(
         menu_title='Sections',
         options=['Introduction','DataVisualisation', "Pre-processing", "Modélisation", "Interprétation", "Recommandations & Perspectives", "Outil  Prédictif"]) 
-with st.sidebar:
-    st.markdown("---")  
-    st.subheader("Membres du projet")  
-    st.markdown("- **Dilène SANTOS**")
-    st.markdown("- **Carolle DEUMENI**")
-    st.markdown("- **Fatoumata DIALLO**")
-    st.markdown("- **Douniazed FILALI**")
+#with st.sidebar:
+    #st.markdown("---")  
+    #st.subheader("Membres du projet")  
+    #st.markdown("- **Dilène SANTOS**")
+    #st.markdown("- **Carolle DEUMENI**")
+    #st.markdown("- **Fatoumata DIALLO**")
+    #st.markdown("- **Douniazed FILALI**")
  
 if selected == 'Introduction':  
     st.title("Prédiction du succès d’une campagne Marketing pour une banque")
