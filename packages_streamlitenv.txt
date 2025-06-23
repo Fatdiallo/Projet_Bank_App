@@ -249,5 +249,5 @@ yaml=0.2.5=haf1e3a3_0
 zeromq=4.3.5=hcec6c5f_0
 zlib=1.2.13=h4b97444_1
 zstd=1.5.6=h138b38a_0
-scipy==1.10.1
+scipy==1.9.3
 statsmodels==0.14.0
