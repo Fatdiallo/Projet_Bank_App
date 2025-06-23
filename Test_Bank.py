@@ -1,14 +1,5 @@
 
 import streamlit as st
-
-st.markdown("""
-<style>
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-header {visibility: hidden;}
-</style>
-""", unsafe_allow_html=True)
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -1923,14 +1914,14 @@ if selected == "Modélisation":
 
     #Liste des modèles enregistrés et leurs noms
     model_files = {
-        "Random Forest": "Random_Forest_model_avec_duration_sans_parametres.pkl",
-        "Logistic Regression": "Logistic_Regression_model_avec_duration_sans_parametres.pkl",
-        "Decision Tree": "Decision_Tree_model_avec_duration_sans_parametres.pkl",
-        "KNN": "KNN_model_avec_duration_sans_parametres.pkl",
-        "AdaBoost": "AdaBoost_model_avec_duration_sans_parametres.pkl",
-        "Bagging": "Bagging_model_avec_duration_sans_parametres.pkl",
-        "SVM": "SVM_model_avec_duration_sans_parametres.pkl",
-        "XGBOOST": "XGBOOST_model_avec_duration_sans_parametres.pkl",
+        "Random Forest": "/Users/admin/Desktop/BANK_APP/Random_Forest_model_avec_duration_sans_parametres.pkl",
+        "Logistic Regression": "/Users/admin/Desktop/BANK_APP/Logistic_Regression_model_avec_duration_sans_parametres.pkl",
+        "Decision Tree": "/Users/admin/Desktop/BANK_APP/Decision_Tree_model_avec_duration_sans_parametres.pkl",
+        "KNN": "/Users/admin/Desktop/BANK_APP/KNN_model_avec_duration_sans_parametres.pkl",
+        "AdaBoost": "/Users/admin/Desktop/BANK_APP/AdaBoost_model_avec_duration_sans_parametres.pkl",
+        "Bagging": "/Users/admin/Desktop/BANK_APP/Bagging_model_avec_duration_sans_parametres.pkl",
+        "SVM": "/Users/admin/Desktop/BANK_APP/SVM_model_avec_duration_sans_parametres.pkl",
+        "XGBOOST": "/Users/admin/Desktop/BANK_APP/XGBOOST_model_avec_duration_sans_parametres.pkl",
     }
 
         
@@ -2022,17 +2013,17 @@ if selected == "Modélisation":
     #COMME ON A ENREGISTRÉ LES MODÈLES, VOICI LE NOUVEAU CODE À UTILISER : 
     # Liste des modèles enregistrés et leurs fichiers correspondants
     model_files_team = {
-        "RF_dounia": "RF_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "RF_fatou": "RF_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "RF_carolle": "RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "SVM_dounia": "SVM_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "SVM_dilene": "SVM_dilene_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "SVM_fatou": "SVM_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "SVM_carolle": "SVM_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "XGBOOST_dounia": "XGBOOST_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "XGBOOST_dilene": "XGBOOST_dilene_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "XGBOOST_carolle": "XGBOOST_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "XGBOOST_fatou": "XGBOOST_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "RF_dounia": "/Users/admin/Desktop/BANK_APP/RF_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "RF_fatou": "/Users/admin/Desktop/BANK_APP/RF_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "RF_carolle": "/Users/admin/Desktop/BANK_APP/RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "SVM_dounia": "/Users/admin/Desktop/BANK_APP/SVM_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "SVM_dilene": "/Users/admin/Desktop/BANK_APP/SVM_dilene_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "SVM_fatou": "/Users/admin/Desktop/BANK_APP/SVM_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "SVM_carolle": "/Users/admin/Desktop/BANK_APP/SVM_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "XGBOOST_dounia": "/Users/admin/Desktop/BANK_APP/XGBOOST_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "XGBOOST_dilene": "/Users/admin/Desktop/BANK_APP/XGBOOST_dilene_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "XGBOOST_carolle": "/Users/admin/Desktop/BANK_APP/XGBOOST_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "XGBOOST_fatou": "/Users/admin/Desktop/BANK_APP/XGBOOST_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
     }
 
 
@@ -2117,9 +2108,9 @@ if selected == "Modélisation":
     #LES MODÈLES PRÉCÉDENTS ONT ÉTÉ ENREGISTRÉS VIA JOBLIB donc nouveau code pour appeler ces modèles enregistrés
     # Liste des modèles enregistrés et leurs fichiers correspondants
     model_files_grid_2 = {
-        "Random Forest GridSearch2": "Random_Forest_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "SVM GridSearch2": "SVM_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "XGBOOST GridSearch2": "XGBOOST_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "Random Forest GridSearch2": "/Users/admin/Desktop/BANK_APP/Random_Forest_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "SVM GridSearch2": "/Users/admin/Desktop/BANK_APP/SVM_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "XGBOOST GridSearch2": "/Users/admin/Desktop/BANK_APP/XGBOOST_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
     }
 
     # Résultats des modèles
@@ -2203,7 +2194,7 @@ if selected == "Modélisation":
             st.write("RandomForestClassifier(**class_weight= 'balanced', max_depth=20, max_features='sqrt',min_samples_leaf=2, min_samples_split=10, n_estimators= 200, random_state=42**)")
                 
             # Chargement du modèle enregistré
-            filename = "RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl"
+            filename = "/Users/admin/Desktop/BANK_APP/RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl"
             rf_carolle_model = joblib.load(filename)
 
             # Prédictions sur les données test
@@ -2289,21 +2280,21 @@ if selected == "Modélisation":
             #CODE À UTILISER PUISQUE MODÈLES SAUVEGARDÉS
             #Chargement des modèles préalablement enregistrés
             models_SD = {
-                "Random Forest": joblib.load("Random_Forest_model_sans_duration_sans_parametres.pkl"),
-                "Logistic Regression": joblib.load("Logistic_Regression_model_sans_duration_sans_parametres.pkl"),
-                "Decision Tree": joblib.load("Decision_Tree_model_sans_duration_sans_parametres.pkl"),
-                "KNN": joblib.load("KNN_model_sans_duration_sans_parametres.pkl"),
-                "AdaBoost": joblib.load("AdaBoost_model_sans_duration_sans_parametres.pkl"),
-                "Bagging": joblib.load("Bagging_model_sans_duration_sans_parametres.pkl"),
-                "SVM": joblib.load("SVM_model_sans_duration_sans_parametres.pkl"),
-                "XGBOOST": joblib.load("XGBOOST_model_sans_duration_sans_parametres.pkl")
+                "Random Forest": joblib.load("/Users/admin/Desktop/BANK_APP/Random_Forest_model_sans_duration_sans_parametres.pkl"),
+                "Logistic Regression": joblib.load("/Users/admin/Desktop/BANK_APP/Logistic_Regression_model_sans_duration_sans_parametres.pkl"),
+                "Decision Tree": joblib.load("/Users/admin/Desktop/BANK_APP/Decision_Tree_model_sans_duration_sans_parametres.pkl"),
+                "KNN": joblib.load("/Users/admin/Desktop/BANK_APP/KNN_model_sans_duration_sans_parametres.pkl"),
+                "AdaBoost": joblib.load("/Users/admin/Desktop/BANK_APP/AdaBoost_model_sans_duration_sans_parametres.pkl"),
+                "Bagging": joblib.load("/Users/admin/Desktop/BANK_APP/Bagging_model_sans_duration_sans_parametres.pkl"),
+                "SVM": joblib.load("/Users/admin/Desktop/BANK_APP/SVM_model_sans_duration_sans_parametres.pkl"),
+                "XGBOOST": joblib.load("/Users/admin/Desktop/BANK_APP/XGBOOST_model_sans_duration_sans_parametres.pkl")
             }
             # Charger votre modèle
-            filename = "Random_Forest_model_sans_duration_sans_parametres.pkl"
+            filename = "/Users/admin/Desktop/BANK_APP/Random_Forest_model_sans_duration_sans_parametres.pkl"
             model = joblib.load(filename)
 
             # Sauvegarder le modèle avec compression de niveau 9
-            joblib.dump(model, "Random_Forest_model_sans_duration_sans_parametres.pkl", compress=5)
+            joblib.dump(model, "/Users/admin/Desktop/BANK_APP/Random_Forest_model_sans_duration_sans_parametres.pkl", compress=5)
     
             # Résultats des modèles
             results_SD_sans_param = {}
@@ -2411,10 +2402,10 @@ if selected == "Modélisation":
             
             #Chargement des modèles préalablement enregistrés
             models_SD_hyperparam = {
-                "Random Forest": joblib.load("Random_Forest_model_SD_TOP_4_hyperparam.pkl"),
-                "Decision Tree": joblib.load("Decision_Tree_model_SD_TOP_4_hyperparam.pkl"),
-                "SVM": joblib.load("SVM_model_SD_TOP_4_hyperparam.pkl"),
-                "XGBOOST": joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl"),
+                "Random Forest": joblib.load("/Users/admin/Desktop/BANK_APP/Random_Forest_model_SD_TOP_4_hyperparam.pkl"),
+                "Decision Tree": joblib.load("/Users/admin/Desktop/BANK_APP/Decision_Tree_model_SD_TOP_4_hyperparam.pkl"),
+                "SVM": joblib.load("/Users/admin/Desktop/BANK_APP/SVM_model_SD_TOP_4_hyperparam.pkl"),
+                "XGBOOST": joblib.load("/Users/admin/Desktop/BANK_APP/XGBOOST_1_model_SD_TOP_4_hyperparam.pkl"),
             }
 
             # Résultats des modèles
@@ -2471,7 +2462,7 @@ if selected == "Modélisation":
             st.write("XGBClassifier(**gamma=0.05,colsample_bytree=0.9, learning_rate=0.39, max_depth=6, min_child_weight=1.29, n_estimators=34, reg_alpha=1.29, reg_lambda=1.9, scale_pos_weight=2.6, subsample=0.99, random_state=42**)")
                 
             # Chargement du modèle enregistré
-            filename = "/Fatdiallo/Projet_Bank_App/XGBOOST_1_model_SD_TOP_4_hyperparam.pkl"
+            filename = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_model_SD_TOP_4_hyperparam.pkl"
             model_XGBOOST_1_model_SD_TOP_4_hyperparam = joblib.load(filename)
 
             # Prédictions sur les données test
@@ -2538,7 +2529,7 @@ if selected == 'Interprétation':
                 #joblib.dump(shap_values_RF_carolle, "shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
 
                 #CODE À UTILISER UNE FOIS LES SHAP VALUES CHARGÉES
-                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_carolle = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
 
                 fig = plt.figure()
                 shap.summary_plot(shap_values_RF_carolle[:,:,1], X_test)  
@@ -2561,7 +2552,7 @@ if selected == 'Interprétation':
 
                 ### 1 CREATION D'UN EXPLANATION FILTRER SANS LES COLONNES POUR LESQUELLES NOUS ALLONS CALCULER LES MOYENNES
 
-                shap_values_rf_carolle_transformed = joblib.load("shap_values_rf_carolle_transformed.pkl")
+                shap_values_rf_carolle_transformed = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_rf_carolle_transformed.pkl")
 
                 #Étape 1 : Créer une liste des termes à exclure
                 terms_to_exclude = ['month', 'weekday', 'job', 'poutcome', 'marital']
@@ -2647,7 +2638,7 @@ if selected == 'Interprétation':
                 st.subheader("Impact POSITIF de DURATION sur la classe 1")
                 st.write("Summary plot :")
 
-                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_carolle = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
 
                 shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
                 fig = plt.figure()
@@ -2681,7 +2672,7 @@ if selected == 'Interprétation':
                 st.subheader("Impact NEGATIF de HOUSING sur la classe 1")
                 st.write("Summary plot :")
 
-                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_carolle = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
                 
                 shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
                 fig = plt.figure()
@@ -2697,7 +2688,7 @@ if selected == 'Interprétation':
                 st.subheader("Impact POSITIF de PREVIOUS sur la classe 1")
                 st.write("Summary plot :")
 
-                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_carolle = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
 
                 shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
                 fig = plt.figure()
@@ -2735,7 +2726,7 @@ if selected == 'Interprétation':
         #joblib.dump(shap_values_XGBOOST_1, "shap_values_XGBOOST_1_SD_TOP_4_hyperparam.pkl")
     
         #CODE À UTILISER UNE FOIS LES SHAP VALUES CHARGÉES
-        shap_values_XGBOOST_1 = joblib.load("shap_values_XGBOOST_1_SD_TOP_4_hyperparam.pkl")
+        shap_values_XGBOOST_1 = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_XGBOOST_1_SD_TOP_4_hyperparam.pkl")
 
         st.subheader("Interprétation du modèle XGBOOST")
         #MODÈLE UTILISÉ : XGBOOST_1_model_SD_TOP_4_hyperparam.pkl         
@@ -3665,7 +3656,7 @@ if selected == 'Outil  Prédictif':
         #st.dataframe(pred_df)
         
         # Interface utilisateur
-        filename = "XGBOOST_1_SD_model_PRED_AVEC_parametres.pkl"
+        filename = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_AVEC_parametres.pkl"
         model_XGBOOST_1_SD_model_PRED_AVEC_parametres = joblib.load(filename)
         explainer = shap.TreeExplainer(model_XGBOOST_1_SD_model_PRED_AVEC_parametres)
         shap_values_pred = explainer.shap_values(pred_df)
@@ -3738,7 +3729,7 @@ if selected == 'Outil  Prédictif':
                     #st.dataframe(pred_df)
     
                     # Conditions pour charger le modèle approprié
-                    filename_LOAN = "XGBOOST_1_SD_model_PRED_loan_XGBOOST_1.pkl"
+                    filename_LOAN = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_loan_XGBOOST_1.pkl"
                     additional_model = joblib.load(filename_LOAN)
                     explainer = shap.TreeExplainer(additional_model)
                     shap_values_loan = explainer.shap_values(pred_df)
@@ -3815,7 +3806,7 @@ if selected == 'Outil  Prédictif':
                     #st.write("Dataframe du client en question")
                     #st.dataframe(pred_df)
                     # Conditions pour charger le modèle approprié
-                    filename_marital = "XGBOOST_1_SD_model_PRED_marital_XGBOOST_1.pkl"
+                    filename_marital = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_marital_XGBOOST_1.pkl"
                     additional_model = joblib.load(filename_marital)
                     explainer = shap.TreeExplainer(additional_model)
                     shap_values_marital = explainer.shap_values(pred_df)
@@ -3890,7 +3881,7 @@ if selected == 'Outil  Prédictif':
                     pred_df = pred_df.reset_index(drop=True)
               
                      # Conditions pour charger le modèle approprié
-                    filename_poutcome = "XGBOOST_1_SD_model_PRED_poutcome_XGBOOST_quater.pkl"
+                    filename_poutcome = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_poutcome_XGBOOST_quater.pkl"
                     additional_model = joblib.load(filename_poutcome)
                     explainer = shap.TreeExplainer(additional_model)
                     shap_values_poutcome = explainer.shap_values(pred_df)
@@ -3971,7 +3962,7 @@ if selected == 'Outil  Prédictif':
                     pred_df = pred_df.reset_index(drop=True)
               
                      # Conditions pour charger le modèle approprié
-                    filename_job = "XGBOOST_1_SD_model_PRED_job_XGBOOST_1.pkl"
+                    filename_job = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_job_XGBOOST_1.pkl"
                     additional_model = joblib.load(filename_job)
                     explainer = shap.TreeExplainer(additional_model)
                     shap_values_job = explainer.shap_values(pred_df)
@@ -4050,7 +4041,7 @@ if selected == 'Outil  Prédictif':
                     pred_df = pred_df.reset_index(drop=True)
                     
                      # Conditions pour charger le modèle approprié
-                    filename_client_category = "XGBOOST_1_SD_model_PRED_client_category_XGBOOST_1.pkl"
+                    filename_client_category = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_client_category_XGBOOST_1.pkl"
                     additional_model = joblib.load(filename_client_category)
                     explainer = shap.TreeExplainer(additional_model)
                     shap_values_client_category = explainer.shap_values(pred_df)
