@@ -1,18 +1,24 @@
-streamlit
+
+
+streamlit==1.35.0
 streamlit_option_menu
 streamlit_extras
+
 numpy==1.26.4
 pandas==2.2.3
+pyarrow
+
 joblib==1.4.2
-scikit-learn==1.2.2
+scikit-learn==1.4.2
+xgboost==2.1.1
+shap
+
 plotly
-xgboost
 matplotlib
 seaborn
-pyarrow
-scipy
-shap
+
+scipy==1.10.1
+statsmodels==0.14.0
 IPython
-statsmodels
 
 
