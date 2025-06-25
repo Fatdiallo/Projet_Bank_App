@@ -16,7 +16,7 @@ matplotlib
 seaborn
 
 scipy>=1.11.0
-statsmodels==0.14.0
+statsmodels>=0.14.1
 IPython
 
 
