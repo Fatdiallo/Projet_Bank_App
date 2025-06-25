@@ -18,5 +18,3 @@ seaborn
 scipy==1.13.1
 statsmodels==0.14.1
 IPython
-
-
