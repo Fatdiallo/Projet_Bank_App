@@ -1931,8 +1931,17 @@ if selected == "Modélisation":
     for name, file_path in model_files.items():
         # Charger le modèle sauvegardé
         trained_clf = joblib.load(file_path)
+        # Align X_test columns to model's expected columns
+        if hasattr(trained_clf, 'feature_names_in_'):
+            expected_cols = trained_clf.feature_names_in_
+            for col in expected_cols:
+                if col not in X_test.columns:
+                    X_test[col] = 0  # or np.nan, depending on your model's needs
+            X_test_aligned = X_test[expected_cols]
+        else:
+            X_test_aligned = X_test
         # Faire des prédictions
-        y_pred = trained_clf.predict(X_test)
+        y_pred = trained_clf.predict(X_test_aligned)
 
         # Calculer les métriques
         accuracy = accuracy_score(y_test, y_pred)
@@ -2035,7 +2044,7 @@ if selected == "Modélisation":
         trained_clf = joblib.load(file_path)
         
         # Faire des prédictions
-        y_pred = trained_clf.predict(X_test)
+        y_pred = trained_clf.predict(X_test_aligned)
 
         # Calculer les métriques
         accuracy = accuracy_score(y_test, y_pred)
@@ -2121,7 +2130,7 @@ if selected == "Modélisation":
         trained_clf = joblib.load(file_path)
         
         # Faire des prédictions
-        y_pred = trained_clf.predict(X_test)
+        y_pred = trained_clf.predict(X_test_aligned)
 
         # Calculer les métriques
         accuracy = accuracy_score(y_test, y_pred)
@@ -2197,7 +2206,7 @@ if selected == "Modélisation":
             rf_carolle_model = joblib.load(filename)
 
             # Prédictions sur les données test
-            y_pred = rf_carolle_model.predict(X_test)
+            y_pred = rf_carolle_model.predict(X_test_aligned)
 
             # Calcul des métriques pour chaque classe
             report = classification_report(y_test, y_pred, target_names=["Classe 0", "Classe 1"], output_dict=True)
@@ -2531,7 +2540,7 @@ if selected == 'Interprétation':
                 shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
 
                 fig = plt.figure()
-                shap.summary_plot(shap_values_RF_carolle[:,:,1], X_test)  
+                shap.summary_plot(shap_values_RF_carolle[:,:,1], X_test_aligned)  
                 st.pyplot(fig)
 
             
@@ -2726,6 +2735,11 @@ if selected == 'Interprétation':
     
         #CODE À UTILISER UNE FOIS LES SHAP VALUES CHARGÉES
         shap_values_XGBOOST_1 = joblib.load("shap_values_XGBOOST_1_SD_TOP_4_hyperparam.pkl")
+        model_XGBOOST_1 = joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
+        X_test_aligned = align_X_test(model_XGBOOST_1, X_test_sd)
+        fig = plt.figure()
+        shap.summary_plot(shap_values_XGBOOST_1, X_test_aligned)
+        st.pyplot(fig)
 
         st.subheader("Interprétation du modèle XGBOOST")
         #MODÈLE UTILISÉ : XGBOOST_1_model_SD_TOP_4_hyperparam.pkl         
@@ -2740,7 +2754,7 @@ if selected == 'Interprétation':
                 st.write("Le summary plot de SHAP permet d'**évaluer l'impact positif ou négatif de chaque variable sur les prédictions** du modèle.")
 
                 fig = plt.figure()
-                shap.summary_plot(shap_values_XGBOOST_1, X_test_sd)  
+                shap.summary_plot(shap_values_XGBOOST_1, X_test_aligned)  
                 st.pyplot(fig)
                 
             if submenu_global == "Bar plot" :
@@ -2749,8 +2763,8 @@ if selected == 'Interprétation':
                 st.write("Nous avons par ailleurs regroupé certaines variables catégorielles dispatchées en plusieurs colonnes après encodage afin d'avoir une vue d'ensemble de leur effet positif ou négatif sur les prédictions.")
 
                 explanation_XGBOOST_1 = shap.Explanation(values=shap_values_XGBOOST_1,
-                                     data=X_test_sd.values, # Assumant que  X_test est un DataFrame
-                                     feature_names=X_test_sd.columns)
+                                     data=X_test_aligned.values, # Assumant que  X_test est un DataFrame
+                                     feature_names=X_test_aligned.columns)
                 shap.plots.bar(explanation_XGBOOST_1)
             
                 ### 1 CREATION D'UN EXPLANATION FILTRER SANS LES COLONNES POUR LESQUELLES NOUS ALLONS CALCULER LES MOYENNES
@@ -2759,31 +2773,31 @@ if selected == 'Interprétation':
                 terms_to_exclude = ['month', 'weekday', 'job', 'poutcome', 'marital']
     
                 #Étape 2 : Filtrer les colonnes qui ne contiennent pas les termes à exclure
-                filtered_columns = [col for col in X_test_sd.columns if not any(term in col for term in terms_to_exclude)]
+                filtered_columns = [col for col in X_test_aligned.columns if not any(term in col for term in terms_to_exclude)]
     
                 #Étape 3 : Identifier les indices correspondants dans X_test_sd
-                filtered_indices = [X_test_sd.columns.get_loc(col) for col in filtered_columns]
+                filtered_indices = [X_test_aligned.columns.get_loc(col) for col in filtered_columns]
                 shap_values_filtered_XGBOOST_1 = shap_values_XGBOOST_1[:, filtered_indices]
     
                 # Étape 4 : On créé un nouvel Explanation avec les colonnes filtrées
                 explanation_filtered_XGBOOST_1 = shap.Explanation(values=shap_values_filtered_XGBOOST_1,
-                                                data=X_test_sd.values[:, filtered_indices],  # Garder uniquement les colonnes correspondantes
+                                                data=X_test_aligned.values[:, filtered_indices],  # Garder uniquement les colonnes correspondantes
                                                 feature_names=filtered_columns)  # Les noms des features
     
                 ###2 CRÉATION D'UN NOUVEAU EXPLANATION AVEC LES MOYENNES SHAP POUR LES COLONNES MONTH / WEEKDAY / POUTCOME / JOB / MARITAL
                 #Fonction pour récupérer les moyennes SHAP en valeur absolue pour les colonnes qui nous intéressent
                 def get_mean_shap_values(column_names, shap_values):
                     # Assurez-vous d'accéder aux valeurs à l'intérieur de shap_values
-                    indices = [X_test_sd.columns.get_loc(col) for col in column_names]
+                    indices = [X_test_aligned.columns.get_loc(col) for col in column_names]
                     values = shap_values.values[:, indices]  # Utilisez .values pour accéder aux valeurs brutes
                     return np.mean(np.abs(values), axis=0)
     
                 # Étape 1 : On identifie les colonnes que l'on recherche
-                month_columns = [col for col in X_test_sd.columns if 'month' in col]
-                weekday_columns = [col for col in X_test_sd.columns if 'weekday' in col]
-                poutcome_columns = [col for col in X_test_sd.columns if 'poutcome' in col]
-                job_columns = [col for col in X_test_sd.columns if 'job' in col]
-                marital_columns = [col for col in X_test_sd.columns if 'marital' in col]
+                month_columns = [col for col in X_test_aligned.columns if 'month' in col]
+                weekday_columns = [col for col in X_test_aligned.columns if 'weekday' in col]
+                poutcome_columns = [col for col in X_test_aligned.columns if 'poutcome' in col]
+                job_columns = [col for col in X_test_aligned.columns if 'job' in col]
+                marital_columns = [col for col in X_test_aligned.columns if 'marital' in col]
     
                 # Étape 2 : On utilise notre fonction pour calculer les moyennes des valeurs SHAP absolues
                 mean_shap_month = get_mean_shap_values(month_columns, shap_values_XGBOOST_1)

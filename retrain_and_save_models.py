@@ -103,4 +103,38 @@ for filename, model in models.items():
     joblib.dump(model, filename)
     print(f"Saved {filename}")
 
-print('All avec_duration models retrained and saved successfully.') 
+print('All avec_duration models retrained and saved successfully.')
+
+# TEAM models with specific hyperparameters
+team_models = {
+    'RF_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl': RandomForestClassifier(max_depth=None, max_features='log2', min_samples_leaf=2, min_samples_split=2, n_estimators=200, random_state=42),
+    'RF_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl': RandomForestClassifier(max_depth=None, max_features='log2', min_samples_leaf=2, min_samples_split=2, n_estimators=200, random_state=42),
+    'RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl': RandomForestClassifier(class_weight='balanced', max_depth=20, max_features='sqrt', min_samples_leaf=2, min_samples_split=10, n_estimators=200, random_state=42),
+    'SVM_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl': SVC(C=1, class_weight='balanced', gamma='scale', kernel='rbf', probability=True, random_state=42),
+    'SVM_dilene_model_AD_TOP_3_hyperparam_TEAM.pkl': SVC(C=0.1, class_weight='balanced', gamma=0.1, kernel='rbf', probability=True, random_state=42),
+    'SVM_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl': SVC(kernel='rbf', gamma='scale', C=1, probability=True, random_state=42),
+    'SVM_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl': SVC(C=0.1, class_weight='balanced', gamma='scale', kernel='rbf', probability=True, random_state=42),
+    'XGBOOST_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl': XGBClassifier(colsample_bytree=1.0, learning_rate=0.05, max_depth=7, min_child_weight=1, n_estimators=200, subsample=0.8, random_state=42, use_label_encoder=False, eval_metric='logloss'),
+    'XGBOOST_dilene_model_AD_TOP_3_hyperparam_TEAM.pkl': XGBClassifier(base_score=0.3, gamma=14, learning_rate=0.6, max_delta_step=1, max_depth=27, min_child_weight=2, n_estimators=900, random_state=42, use_label_encoder=False, eval_metric='logloss'),
+    'XGBOOST_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl': XGBClassifier(colsample_bytree=0.8, gamma=10, max_depth=17, min_child_weight=1, n_estimators=1000, reg_lambda=0.89, random_state=42, use_label_encoder=False, eval_metric='logloss'),
+    'XGBOOST_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl': XGBClassifier(colsample_bytree=0.8, gamma=5, learning_rate=0.1, max_depth=5, n_estimators=100, subsample=0.8, random_state=42, use_label_encoder=False, eval_metric='logloss'),
+}
+
+for filename, model in team_models.items():
+    model.fit(X_train, y_train)
+    joblib.dump(model, filename)
+    print(f"Saved {filename}")
+
+# GridSearch2 models
+grid2_models = {
+    'Random_Forest_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl': RandomForestClassifier(class_weight='balanced', max_depth=None, max_features='sqrt', min_samples_leaf=2, min_samples_split=15, n_estimators=200, random_state=42),
+    'SVM_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl': SVC(C=1, class_weight='balanced', gamma='scale', kernel='rbf', probability=True, random_state=42),
+    'XGBOOST_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl': XGBClassifier(colsample_bytree=0.8, gamma=5, learning_rate=0.05, max_depth=17, min_child_weight=1, n_estimators=200, subsample=0.8, random_state=42, use_label_encoder=False, eval_metric='logloss'),
+}
+
+for filename, model in grid2_models.items():
+    model.fit(X_train, y_train)
+    joblib.dump(model, filename)
+    print(f"Saved {filename}")
+
+print('All TEAM and GridSearch2 models retrained and saved successfully.') 
