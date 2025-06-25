@@ -54,10 +54,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 imputer = SimpleImputer(strategy='most_frequent')
 X_train.loc[:, ['job']] = imputer.fit_transform(X_train[['job']])
 X_test.loc[:, ['job']] = imputer.transform(X_test[['job']])
-X_train['poutcome'] = X_train['poutcome'].fillna(method='bfill').fillna(X_train['poutcome'].mode()[0])
-X_test['poutcome'] = X_test['poutcome'].fillna(method='bfill').fillna(X_test['poutcome'].mode()[0])
-X_train['education'] = X_train['education'].fillna(method='bfill').fillna(X_train['education'].mode()[0])
-X_test['education'] = X_test['education'].fillna(method='bfill').fillna(X_test['education'].mode()[0])
+X_train['poutcome'] = X_train['poutcome'].bfill().fillna(X_train['poutcome'].mode()[0])
+X_test['poutcome'] = X_test['poutcome'].bfill().fillna(X_test['poutcome'].mode()[0])
+X_train['education'] = X_train['education'].bfill().fillna(X_train['education'].mode()[0])
+X_test['education'] = X_test['education'].bfill().fillna(X_test['education'].mode()[0])
 
 # Standardize
 scaler = StandardScaler()
@@ -66,7 +66,7 @@ X_train[cols_num] = scaler.fit_transform(X_train[cols_num])
 X_test[cols_num] = scaler.transform(X_test[cols_num])
 
 # Encode binary categorical
-oneh = OneHotEncoder(drop='first', sparse=False)
+oneh = OneHotEncoder(drop='first', sparse_output=False)
 cat1 = ['default', 'housing', 'loan']
 X_train[cat1] = oneh.fit_transform(X_train[cat1])
 X_test[cat1] = oneh.transform(X_test[cat1])
