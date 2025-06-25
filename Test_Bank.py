@@ -304,7 +304,7 @@ with st.sidebar:
     #st.markdown("- **Douniazed FILALI**")
  
 if selected == 'Introduction':  
-    st.title("Prédiction du succès d’une campagne Marketing pour une banque")
+    st.title("Prédiction du succès d'une campagne Marketing pour une banque")
     st.subheader("Contexte du projet")
     st.write("Le projet vise à analyser des données marketing issues d'une banque qui a utilisé le télémarketing pour **promouvoir un produit financier appelé 'dépôt à terme'**. Ce produit nécessite que le client dépose une somme d'argent dans un compte dédié, sans possibilité de retrait avant une date déterminée. En retour, le client reçoit des intérêts à la fin de cette période. **L'objectif de cette analyse est d'examiner les informations personnelles des clients, comme l'âge, le statut matrimonial, le montant d'argent déposé, le nombre de contacts réalisés, etc., afin de comprendre les facteurs qui influencent la décision des clients de souscrire ou non à ce produit financier.**")
     
@@ -932,7 +932,7 @@ if selected == 'DataVisualisation':
                  # Affichage du DataFrame final dans Streamlit sans la colonne d'index
                 st.write("### Résumé des clients par job avec les statistiques d'âge:")
                 st.dataframe(summary)
-                st.text("Nous remarquons sur ce tableau qu’il y a une grande diversification des âges pour tous les groupes.")
+                st.text("Nous remarquons sur ce tableau qu'il y a une grande diversification des âges pour tous les groupes.")
                 st.write("____________________________________")
                 
             elif sub_pages == "Statut Matrimonial et Education":
@@ -974,7 +974,7 @@ if selected == 'DataVisualisation':
                 st.pyplot(plt)
     
                 # Texte explicatif
-                st.text("Nous observons que la majorité des clients sont mariés, suivis par un groupe de clients célibataires. Les niveaux d’éducation des clients sont le secondaire et le tertiaire. Ceci montre que les clients détenant le DAT (dépôt à terme) ont un certain niveau académique.")
+                st.text("Nous observons que la majorité des clients sont mariés, suivis par un groupe de clients célibataires. Les niveaux d'éducation des clients sont le secondaire et le tertiaire. Ceci montre que les clients détenant le DAT (dépôt à terme) ont un certain niveau académique.")
                 st.write("____________________________________")
 
             elif sub_pages == "Bancaire":
@@ -1087,8 +1087,8 @@ if selected == 'DataVisualisation':
                 st.pyplot(plt)
     
                 st.text("Parmi les clients qui ont un DAT :")
-                st.text("Plus de 60% des clients n’ont pas de prêt immobilier.")
-                st.text("90% des clients n’ont pas de prêt personnel.")
+                st.text("Plus de 60% des clients n'ont pas de prêt immobilier.")
+                st.text("90% des clients n'ont pas de prêt personnel.")
                 st.text("99% des clients ayant des engagements bancaires ne sont pas en défaut de paiement.")
                 st.write("____________________________________")
 
@@ -1199,7 +1199,7 @@ if selected == 'DataVisualisation':
                     st.write("Nombre de contacts réalisés avec le client avant la campagne")   
                     plot_percentage(clients_yes, "previous", "Nombre de contact réalisé avant la campagne")
 
-                    st.write("Plus de 60% des clients qui ont souscrit au DAT n’avaient jamais été contacté par la banque avant cette campagne.")
+                    st.write("Plus de 60% des clients qui ont souscrit au DAT n'avaient jamais été contacté par la banque avant cette campagne.")
     
                 if st.checkbox("Campaign"):
                     #fonction
@@ -1222,7 +1222,7 @@ if selected == 'DataVisualisation':
                         plt.clf()  
                     st.write("Nombre de contacts réalisés avec le client pendant la campagne") 
                     plot_percentage(clients_yes, "campaign", "Nombre de contact réalisé pendant la campagne")
-                    st.write("La plus grande proportion des clients qui ont souscrit au DAT a été contactée une fois pendant cette campagne. Donc en un appel le client a accepté l’offre.")
+                    st.write("La plus grande proportion des clients qui ont souscrit au DAT a été contactée une fois pendant cette campagne. Donc en un appel le client a accepté l'offre.")
                     st.write("____________________________________")
 
             elif sub_pages == "Temporel":
@@ -1263,7 +1263,7 @@ if selected == 'DataVisualisation':
                 plt.ylabel("Pourcentage de clients (%)")
                 st.pyplot(plt)
     
-                st.text("Les périodes où les clients sont susceptibles de souscrire sont le printemps et l’été. Et les jours sont par ordre de souscription : dimanche, mardi, mercredi, lundi, jeudi, vendredi et samedi.")
+                st.text("Les périodes où les clients sont susceptibles de souscrire sont le printemps et l'été. Et les jours sont par ordre de souscription : dimanche, mardi, mercredi, lundi, jeudi, vendredi et samedi.")
                 st.write("____________________________________")
 
     
@@ -1330,11 +1330,11 @@ if selected == 'DataVisualisation':
 
         if st.checkbox("Récapitulatif"):
             st.write("#### Le profil des clients ayant souscrit au produit DAT de la banque est le suivant :")
-            st.write("* Clients **âgés entre 25 et 60 ans** avec des métiers de **manager, technicien, ouvrier, ou travaillant dans l’administration.**")
+            st.write("* Clients **âgés entre 25 et 60 ans** avec des métiers de **manager, technicien, ouvrier, ou travaillant dans l'administration.**")
             st.write("* Ils sont **mariés** pour la plupart et ont un niveau **académique secondaire ou tertiaire.**")
-            st.write("* La majorité des clients n’ont **pas d’engagement bancaire** (prêt personnel, prêt immobilier) et ne sont **pas en défaut de paiement.**")
-            st.write("* Ils n’ont, pour la plupart, **jamais été contacté par la banque.**")
-            st.write("* Ils souscrivent au DAT dans les périodes **fin printemps / l’été**, principalement, dans l’ordre, **le dimanche, mardi, mercredi, lundi.**")
+            st.write("* La majorité des clients n'ont **pas d'engagement bancaire** (prêt personnel, prêt immobilier) et ne sont **pas en défaut de paiement.**")
+            st.write("* Ils n'ont, pour la plupart, **jamais été contacté par la banque.**")
+            st.write("* Ils souscrivent au DAT dans les périodes **fin printemps / l'été**, principalement, dans l'ordre, **le dimanche, mardi, mercredi, lundi.**")
             st.write("* Et la durée moyenne des appels pour convaincre un client de souscrire à un DAT est de **9 minutes.**")
         
 if selected == "Pre-processing":  
@@ -1914,14 +1914,14 @@ if selected == "Modélisation":
 
     #Liste des modèles enregistrés et leurs noms
     model_files = {
-        "Random Forest": "/Users/admin/Desktop/BANK_APP/Random_Forest_model_avec_duration_sans_parametres.pkl",
-        "Logistic Regression": "/Users/admin/Desktop/BANK_APP/Logistic_Regression_model_avec_duration_sans_parametres.pkl",
-        "Decision Tree": "/Users/admin/Desktop/BANK_APP/Decision_Tree_model_avec_duration_sans_parametres.pkl",
-        "KNN": "/Users/admin/Desktop/BANK_APP/KNN_model_avec_duration_sans_parametres.pkl",
-        "AdaBoost": "/Users/admin/Desktop/BANK_APP/AdaBoost_model_avec_duration_sans_parametres.pkl",
-        "Bagging": "/Users/admin/Desktop/BANK_APP/Bagging_model_avec_duration_sans_parametres.pkl",
-        "SVM": "/Users/admin/Desktop/BANK_APP/SVM_model_avec_duration_sans_parametres.pkl",
-        "XGBOOST": "/Users/admin/Desktop/BANK_APP/XGBOOST_model_avec_duration_sans_parametres.pkl",
+        "Random Forest": "Random_Forest_model_avec_duration_sans_parametres.pkl",
+        "Logistic Regression": "Logistic_Regression_model_avec_duration_sans_parametres.pkl",
+        "Decision Tree": "Decision_Tree_model_avec_duration_sans_parametres.pkl",
+        "KNN": "KNN_model_avec_duration_sans_parametres.pkl",
+        "AdaBoost": "AdaBoost_model_avec_duration_sans_parametres.pkl",
+        "Bagging": "Bagging_model_avec_duration_sans_parametres.pkl",
+        "SVM": "SVM_model_avec_duration_sans_parametres.pkl",
+        "XGBOOST": "XGBOOST_model_avec_duration_sans_parametres.pkl",
     }
 
         
@@ -2013,17 +2013,17 @@ if selected == "Modélisation":
     #COMME ON A ENREGISTRÉ LES MODÈLES, VOICI LE NOUVEAU CODE À UTILISER : 
     # Liste des modèles enregistrés et leurs fichiers correspondants
     model_files_team = {
-        "RF_dounia": "/Users/admin/Desktop/BANK_APP/RF_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "RF_fatou": "/Users/admin/Desktop/BANK_APP/RF_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "RF_carolle": "/Users/admin/Desktop/BANK_APP/RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "SVM_dounia": "/Users/admin/Desktop/BANK_APP/SVM_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "SVM_dilene": "/Users/admin/Desktop/BANK_APP/SVM_dilene_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "SVM_fatou": "/Users/admin/Desktop/BANK_APP/SVM_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "SVM_carolle": "/Users/admin/Desktop/BANK_APP/SVM_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "XGBOOST_dounia": "/Users/admin/Desktop/BANK_APP/XGBOOST_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "XGBOOST_dilene": "/Users/admin/Desktop/BANK_APP/XGBOOST_dilene_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "XGBOOST_carolle": "/Users/admin/Desktop/BANK_APP/XGBOOST_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "XGBOOST_fatou": "/Users/admin/Desktop/BANK_APP/XGBOOST_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "RF_dounia": "RF_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "RF_fatou": "RF_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "RF_carolle": "RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "SVM_dounia": "SVM_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "SVM_dilene": "SVM_dilene_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "SVM_fatou": "SVM_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "SVM_carolle": "SVM_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "XGBOOST_dounia": "XGBOOST_dounia_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "XGBOOST_dilene": "XGBOOST_dilene_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "XGBOOST_carolle": "XGBOOST_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "XGBOOST_fatou": "XGBOOST_fatou_model_AD_TOP_3_hyperparam_TEAM.pkl",
     }
 
 
@@ -2108,9 +2108,9 @@ if selected == "Modélisation":
     #LES MODÈLES PRÉCÉDENTS ONT ÉTÉ ENREGISTRÉS VIA JOBLIB donc nouveau code pour appeler ces modèles enregistrés
     # Liste des modèles enregistrés et leurs fichiers correspondants
     model_files_grid_2 = {
-        "Random Forest GridSearch2": "/Users/admin/Desktop/BANK_APP/Random_Forest_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "SVM GridSearch2": "/Users/admin/Desktop/BANK_APP/SVM_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
-        "XGBOOST GridSearch2": "/Users/admin/Desktop/BANK_APP/XGBOOST_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "Random Forest GridSearch2": "Random_Forest_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "SVM GridSearch2": "SVM_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
+        "XGBOOST GridSearch2": "XGBOOST_GridSearch2_model_AD_TOP_3_hyperparam_TEAM.pkl",
     }
 
     # Résultats des modèles
@@ -2194,7 +2194,7 @@ if selected == "Modélisation":
             st.write("RandomForestClassifier(**class_weight= 'balanced', max_depth=20, max_features='sqrt',min_samples_leaf=2, min_samples_split=10, n_estimators= 200, random_state=42**)")
                 
             # Chargement du modèle enregistré
-            filename = "/Users/admin/Desktop/BANK_APP/RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl"
+            filename = "RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl"
             rf_carolle_model = joblib.load(filename)
 
             # Prédictions sur les données test
@@ -2280,21 +2280,21 @@ if selected == "Modélisation":
             #CODE À UTILISER PUISQUE MODÈLES SAUVEGARDÉS
             #Chargement des modèles préalablement enregistrés
             models_SD = {
-                "Random Forest": joblib.load("/Users/admin/Desktop/BANK_APP/Random_Forest_model_sans_duration_sans_parametres.pkl"),
-                "Logistic Regression": joblib.load("/Users/admin/Desktop/BANK_APP/Logistic_Regression_model_sans_duration_sans_parametres.pkl"),
-                "Decision Tree": joblib.load("/Users/admin/Desktop/BANK_APP/Decision_Tree_model_sans_duration_sans_parametres.pkl"),
-                "KNN": joblib.load("/Users/admin/Desktop/BANK_APP/KNN_model_sans_duration_sans_parametres.pkl"),
-                "AdaBoost": joblib.load("/Users/admin/Desktop/BANK_APP/AdaBoost_model_sans_duration_sans_parametres.pkl"),
-                "Bagging": joblib.load("/Users/admin/Desktop/BANK_APP/Bagging_model_sans_duration_sans_parametres.pkl"),
-                "SVM": joblib.load("/Users/admin/Desktop/BANK_APP/SVM_model_sans_duration_sans_parametres.pkl"),
-                "XGBOOST": joblib.load("/Users/admin/Desktop/BANK_APP/XGBOOST_model_sans_duration_sans_parametres.pkl")
+                "Random Forest": joblib.load("Random_Forest_model_sans_duration_sans_parametres.pkl"),
+                "Logistic Regression": joblib.load("Logistic_Regression_model_sans_duration_sans_parametres.pkl"),
+                "Decision Tree": joblib.load("Decision_Tree_model_sans_duration_sans_parametres.pkl"),
+                "KNN": joblib.load("KNN_model_sans_duration_sans_parametres.pkl"),
+                "AdaBoost": joblib.load("AdaBoost_model_sans_duration_sans_parametres.pkl"),
+                "Bagging": joblib.load("Bagging_model_sans_duration_sans_parametres.pkl"),
+                "SVM": joblib.load("SVM_model_sans_duration_sans_parametres.pkl"),
+                "XGBOOST": joblib.load("XGBOOST_model_sans_duration_sans_parametres.pkl")
             }
             # Charger votre modèle
-            filename = "/Users/admin/Desktop/BANK_APP/Random_Forest_model_sans_duration_sans_parametres.pkl"
+            filename = "Random_Forest_model_sans_duration_sans_parametres.pkl"
             model = joblib.load(filename)
 
             # Sauvegarder le modèle avec compression de niveau 9
-            joblib.dump(model, "/Users/admin/Desktop/BANK_APP/Random_Forest_model_sans_duration_sans_parametres.pkl", compress=5)
+            joblib.dump(model, "Random_Forest_model_sans_duration_sans_parametres.pkl", compress=5)
     
             # Résultats des modèles
             results_SD_sans_param = {}
@@ -2402,10 +2402,10 @@ if selected == "Modélisation":
             
             #Chargement des modèles préalablement enregistrés
             models_SD_hyperparam = {
-                "Random Forest": joblib.load("/Users/admin/Desktop/BANK_APP/Random_Forest_model_SD_TOP_4_hyperparam.pkl"),
-                "Decision Tree": joblib.load("/Users/admin/Desktop/BANK_APP/Decision_Tree_model_SD_TOP_4_hyperparam.pkl"),
-                "SVM": joblib.load("/Users/admin/Desktop/BANK_APP/SVM_model_SD_TOP_4_hyperparam.pkl"),
-                "XGBOOST": joblib.load("/Users/admin/Desktop/BANK_APP/XGBOOST_1_model_SD_TOP_4_hyperparam.pkl"),
+                "Random Forest": joblib.load("Random_Forest_model_SD_TOP_4_hyperparam.pkl"),
+                "Decision Tree": joblib.load("Decision_Tree_model_SD_TOP_4_hyperparam.pkl"),
+                "SVM": joblib.load("SVM_model_SD_TOP_4_hyperparam.pkl"),
+                "XGBOOST": joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl"),
             }
 
             # Résultats des modèles
@@ -2462,7 +2462,7 @@ if selected == "Modélisation":
             st.write("XGBClassifier(**gamma=0.05,colsample_bytree=0.9, learning_rate=0.39, max_depth=6, min_child_weight=1.29, n_estimators=34, reg_alpha=1.29, reg_lambda=1.9, scale_pos_weight=2.6, subsample=0.99, random_state=42**)")
                 
             # Chargement du modèle enregistré
-            filename = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_model_SD_TOP_4_hyperparam.pkl"
+            filename = "XGBOOST_1_model_SD_TOP_4_hyperparam.pkl"
             model_XGBOOST_1_model_SD_TOP_4_hyperparam = joblib.load(filename)
 
             # Prédictions sur les données test
@@ -2529,7 +2529,7 @@ if selected == 'Interprétation':
                 #joblib.dump(shap_values_RF_carolle, "shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
 
                 #CODE À UTILISER UNE FOIS LES SHAP VALUES CHARGÉES
-                shap_values_RF_carolle = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
 
                 fig = plt.figure()
                 shap.summary_plot(shap_values_RF_carolle[:,:,1], X_test)  
@@ -2552,7 +2552,7 @@ if selected == 'Interprétation':
 
                 ### 1 CREATION D'UN EXPLANATION FILTRER SANS LES COLONNES POUR LESQUELLES NOUS ALLONS CALCULER LES MOYENNES
 
-                shap_values_rf_carolle_transformed = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_rf_carolle_transformed.pkl")
+                shap_values_rf_carolle_transformed = joblib.load("shap_values_rf_carolle_transformed.pkl")
 
                 #Étape 1 : Créer une liste des termes à exclure
                 terms_to_exclude = ['month', 'weekday', 'job', 'poutcome', 'marital']
@@ -2638,7 +2638,7 @@ if selected == 'Interprétation':
                 st.subheader("Impact POSITIF de DURATION sur la classe 1")
                 st.write("Summary plot :")
 
-                shap_values_RF_carolle = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
 
                 shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
                 fig = plt.figure()
@@ -2672,7 +2672,7 @@ if selected == 'Interprétation':
                 st.subheader("Impact NEGATIF de HOUSING sur la classe 1")
                 st.write("Summary plot :")
 
-                shap_values_RF_carolle = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
                 
                 shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
                 fig = plt.figure()
@@ -2688,7 +2688,7 @@ if selected == 'Interprétation':
                 st.subheader("Impact POSITIF de PREVIOUS sur la classe 1")
                 st.write("Summary plot :")
 
-                shap_values_RF_carolle = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
 
                 shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
                 fig = plt.figure()
@@ -2726,7 +2726,7 @@ if selected == 'Interprétation':
         #joblib.dump(shap_values_XGBOOST_1, "shap_values_XGBOOST_1_SD_TOP_4_hyperparam.pkl")
     
         #CODE À UTILISER UNE FOIS LES SHAP VALUES CHARGÉES
-        shap_values_XGBOOST_1 = joblib.load("/Users/admin/Desktop/BANK_APP/shap_values_XGBOOST_1_SD_TOP_4_hyperparam.pkl")
+        shap_values_XGBOOST_1 = joblib.load("shap_values_XGBOOST_1_SD_TOP_4_hyperparam.pkl")
 
         st.subheader("Interprétation du modèle XGBOOST")
         #MODÈLE UTILISÉ : XGBOOST_1_model_SD_TOP_4_hyperparam.pkl         
@@ -2831,7 +2831,7 @@ if selected == 'Interprétation':
                 st.pyplot(fig)
                 
                 st.subheader("Choix des variables les plus importantes")
-                st.write("1. **HOUSING** : détention ou non d’un prêt immobilier")
+                st.write("1. **HOUSING** : détention ou non d'un prêt immobilier")
                 st.write("2. **BALANCE** : solde bancaire du client")
                 st.write("3. **ÂGE**")
                 st.write("4. **PREVIOUS** : nombre de contacts effectués avant cette campagne avec le client")
@@ -2905,7 +2905,7 @@ if selected == 'Interprétation':
                 st.markdown("Ce zoom offre une meilleure visibilité :  \n\
                 - Les clients avec un solde compris entre 0 et 300€ affichent majoritairement des valeurs shap négatives  \n\
                 - Les clients avec une balance supérieure à 800€ affichent majoritairement des valeurs shap positives  \n\
-                - Les clients avec un solde compris entre 300 et 800€ sont scindés en deux groupes : une moitié ne souscrit pas au produit, mais l’autre oui.")
+                - Les clients avec un solde compris entre 300 et 800€ sont scindés en deux groupes : une moitié ne souscrit pas au produit, mais l'autre oui.")
 
                 st.subheader("Recherche d'autres dépendances")
                 st.write("Pour tenter de départager ces clients dont la balance est comprise entre 300 et 800€, examinons leurs relations avec d'autres variables afin d'identifier des tendances.")
@@ -2995,8 +2995,8 @@ if selected == 'Interprétation':
             if submenu_local == "AGE" :
                 st.title("ÂGE : POIDS +0.23")
                 st.subheader("IMPACT POSITIF CHEZ LES JEUNES ET LES PLUS ÂGÉS")
-                st.subheader("IMPACT NÉGATIF DES TRANCHES D’ÂGES MOYENNES")
-                st.write("L’âge joue un rôle significatif dans l’orientation des prédictions. Valeurs comprises entre 18 et 74 ans.")
+                st.subheader("IMPACT NÉGATIF DES TRANCHES D'ÂGES MOYENNES")
+                st.write("L'âge joue un rôle significatif dans l'orientation des prédictions. Valeurs comprises entre 18 et 74 ans.")
                 fig = plt.figure()
                 shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("age")]], 
                                   X_test_sd[["age"]], 
@@ -3040,7 +3040,7 @@ if selected == 'Interprétation':
                 fig = plt.gcf()          
                 st.pyplot(fig)       
                 plt.close() 
-                st.write("La distribution des valeurs de previous montre très clairement que lorsque les clients n’ont jamais été contactés (previous = 0) alors la shap value est négative, tandis que **les clients qui ont été contactés par le passé affichent des valeurs shap très nettement positives, ils sont donc plus susceptibles de souscrire au produit.**")
+                st.write("La distribution des valeurs de previous montre très clairement que lorsque les clients n'ont jamais été contactés (previous = 0) alors la shap value est négative, tandis que **les clients qui ont été contactés par le passé affichent des valeurs shap très nettement positives, ils sont donc plus susceptibles de souscrire au produit.**")
                         
             if submenu_local == "CAMPAIGN" :
                 st.title("CAMPAIGN : POIDS +0.10")
@@ -3053,7 +3053,7 @@ if selected == 'Interprétation':
                                   show=True)
                 st.pyplot(fig)
 
-                st.write("Bien que cette variable ait un impact relativement faible, elle reste positive dans notre modèle. Il semble que plus le nombre de contacts avec le client pendant la campagne est élevé (points violets et rouges), plus cela a un effet négatif sur la prédiction : un nombre élevé d’appels semble entraîner un échec à convaincre le client à souscrire au produit.")
+                st.write("Bien que cette variable ait un impact relativement faible, elle reste positive dans notre modèle. Il semble que plus le nombre de contacts avec le client pendant la campagne est élevé (points violets et rouges), plus cela a un effet négatif sur la prédiction : un nombre élevé d'appels semble entraîner un échec à convaincre le client à souscrire au produit.")
                 
                 feature_name = "campaign"
                 
@@ -3062,7 +3062,7 @@ if selected == 'Interprétation':
                 fig = plt.gcf()          
                 st.pyplot(fig)       
                 plt.close() 
-                st.write("Ce graphique montre clairement que **les clients qui n’ont été contactés qu’une seule fois affichent très majoritairement des SHAP values positives.**")
+                st.write("Ce graphique montre clairement que **les clients qui n'ont été contactés qu'une seule fois affichent très majoritairement des SHAP values positives.**")
 
             if submenu_local == "EDUCATION" :
                 st.title("EDUCATION : POIDS +0.09")
@@ -3188,14 +3188,14 @@ if selected == 'Interprétation':
   
 if selected == "Recommandations & Perspectives":
       st.subheader("Recommandations & Perspectives")
-      submenu_reco = st.radio("", ("PROFIL DES CLIENTS A CONTACTER", "NOMBRE ET DUREE D’APPEL", "RECAP"), horizontal=True)
+      submenu_reco = st.radio("", ("PROFIL DES CLIENTS A CONTACTER", "NOMBRE ET DUREE D'APPEL", "RECAP"), horizontal=True)
 
       if submenu_reco == "PROFIL DES CLIENTS A CONTACTER" :
             submenu_profil = st.radio("", ("HOUSING", "ÂGE", "BALANCE", "PREVIOUS", "EDUCATION"), horizontal=True) 
 
             if submenu_profil == "HOUSING" :
-                st.write("#### HOUSING:","Détention ou non d’un prêt immobilier")
-                st.write("##### Prioriser les clients qui n’ont pas de prêt immobilier")
+                st.write("#### HOUSING:","Détention ou non d'un prêt immobilier")
+                st.write("##### Prioriser les clients qui n'ont pas de prêt immobilier")
                 st.write("Le modèle montre que les **clients ayant un prêt immobilier ont une probabilité plus faible de souscrire au DAT**.")
                 st.write("Une **analyse approfondie du contexte métier** est nécessaire pour **expliquer cette corrélation négative**. Deux hypothèses possibles :")
                 st.write(" - Les clients ayant un prêt immobilier pourraient **être perçus comme plus à risque de défaut de paiement en raison de leur dette existante**.")
@@ -3213,7 +3213,7 @@ if selected == "Recommandations & Perspectives":
                 st.write("#### BALANCE:","Solde bancaire du client")
                 st.write("##### Contacter en priorité les clients dont la balance est supérieure à 800€.")
                 st.write("Pour les clients ayant une **balance entre 0 et 800 €**, le modèle divise cette population en **deux groupes de taille quasi identiques** : ceux qui souscrivent et ceux qui ne le font pas. Pour **choisir les clients à contacter en priorité**, il est recommandé de privilégier ceux qui : ")
-                st.write(" -  N’ont **pas de prêt immobilier**")
+                st.write(" -  N'ont **pas de prêt immobilier**")
                 st.write(" -  Sont âgés de **moins de 29 ans ou de plus de 58 ans**")
           
             if submenu_profil == "PREVIOUS" :
@@ -3235,32 +3235,32 @@ if selected == "Recommandations & Perspectives":
                 st.write(" -  Les **métiers de management** se distinguent par **une forte proportion de personnes ayant un niveau d'éducation tertiaire**.")
   
 
-      if submenu_reco == "NOMBRE ET DUREE D’APPEL" :
+      if submenu_reco == "NOMBRE ET DUREE D'APPEL" :
             submenu_appel = st.radio("", ("DURATION", "CAMPAIGN"), horizontal=True) 
 
             if submenu_appel == "DURATION" :
                 st.write("#### DURATION:","Durée du dernier contact en secondes")
                 st.write("Le temps consacré à chaque client s'avère être un facteur clé de succès dans le processus de conversion. **Les commerciaux devraient privilégier des interactions plus longues**, en particulier lors des premières prises de contact, et se concentrer sur **la qualité des échanges** pour mieux comprendre les besoins des clients. . ")
-                st.write("**Les résultats de nos analyses soulignent l’importance stratégique de la durée des interactions commerciales.** En optimisant le temps consacré à chaque client, la banque peut **significativement améliorer** ses taux de conversion et renforcer son efficacité commerciale.")
+                st.write("**Les résultats de nos analyses soulignent l'importance stratégique de la durée des interactions commerciales.** En optimisant le temps consacré à chaque client, la banque peut **significativement améliorer** ses taux de conversion et renforcer son efficacité commerciale.")
                 st.write("Pour **maximiser les chances de souscription** au produit bancaire DAT, voici les recommandations clés : ")
                 st.write(" -  **Encourager des échanges plus longs :** Former les équipes commerciales à adopter une approche engageante dès le premier contact, afin de mieux comprendre les attentes des clients et de leur proposer des solutions sur mesure. ")
                 st.write(" -  **Fixer un objectif minimal de 6 minutes par appel** pour les prospects à fort potentiel. Les analyses montrent en effet que **les interactions dépassant 360 secondes (6 minutes) ont un impact significatif**, les SHAP values traduisant une corrélation positive à partir de cette durée. ")
           
             if submenu_appel == "CAMPAIGN" :
                 st.write("#### CAMPAIGN:","nombre de contacts effectués avec le client pendant la campagne (dernier contact inclus)")
-                st.write("##### Il ne semble pas pertinent de contacter les clients plus d’une fois pendant la campagne. ")
-                st.write("Notre modèle montre qu’il ne semble pas payant de contacter les clients plus d’une fois pour leur proposer le produit. Il vaut mieux **capitaliser sur des clients pas encore contactés** pour leur proposer le produit plutôt que de contacter plusieurs fois le même client. ")
+                st.write("##### Il ne semble pas pertinent de contacter les clients plus d'une fois pendant la campagne. ")
+                st.write("Notre modèle montre qu'il ne semble pas payant de contacter les clients plus d'une fois pour leur proposer le produit. Il vaut mieux **capitaliser sur des clients pas encore contactés** pour leur proposer le produit plutôt que de contacter plusieurs fois le même client. ")
 
     
       if submenu_reco == "RECAP" :
-          st.write("Nous pouvons résumer les résultats de notre **Modèle pour prédire le succès d’une campagne Marketing pour une banque** dans les points suivants: ")
-          st.write("##### -  Prioriser les clients qui n’ont pas de prêt immobilier")
+          st.write("Nous pouvons résumer les résultats de notre **Modèle pour prédire le succès d'une campagne Marketing pour une banque** dans les points suivants: ")
+          st.write("##### -  Prioriser les clients qui n'ont pas de prêt immobilier")
           st.write("##### -  Prioriser les clients âgés de 18 à 28 ans et de 59 ans ou plus.")
           st.write("##### -  Contacter en priorité les clients dont la balance est supérieure à 800€.")
           st.write("##### -  Prioriser les clients déjà contactés")
           st.write("##### -  Prioriser les clients qui ont un niveau d'éducation tertiaire")
-          st.write("##### -  Maintenir autant que possible une durée d’appel de minimum 6 minutes ")
-          st.write("##### -  Il ne semble pas pertinent de contacter les clients plus d’une fois pendant la campagne. ")
+          st.write("##### -  Maintenir autant que possible une durée d'appel de minimum 6 minutes ")
+          st.write("##### -  Il ne semble pas pertinent de contacter les clients plus d'une fois pendant la campagne. ")
           
 
 
@@ -3656,7 +3656,7 @@ if selected == 'Outil  Prédictif':
         #st.dataframe(pred_df)
         
         # Interface utilisateur
-        filename = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_AVEC_parametres.pkl"
+        filename = "XGBOOST_1_SD_model_PRED_AVEC_parametres.pkl"
         model_XGBOOST_1_SD_model_PRED_AVEC_parametres = joblib.load(filename)
         explainer = shap.TreeExplainer(model_XGBOOST_1_SD_model_PRED_AVEC_parametres)
         shap_values_pred = explainer.shap_values(pred_df)
@@ -3729,7 +3729,7 @@ if selected == 'Outil  Prédictif':
                     #st.dataframe(pred_df)
     
                     # Conditions pour charger le modèle approprié
-                    filename_LOAN = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_loan_XGBOOST_1.pkl"
+                    filename_LOAN = "XGBOOST_1_SD_model_PRED_loan_XGBOOST_1.pkl"
                     additional_model = joblib.load(filename_LOAN)
                     explainer = shap.TreeExplainer(additional_model)
                     shap_values_loan = explainer.shap_values(pred_df)
@@ -3806,7 +3806,7 @@ if selected == 'Outil  Prédictif':
                     #st.write("Dataframe du client en question")
                     #st.dataframe(pred_df)
                     # Conditions pour charger le modèle approprié
-                    filename_marital = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_marital_XGBOOST_1.pkl"
+                    filename_marital = "XGBOOST_1_SD_model_PRED_marital_XGBOOST_1.pkl"
                     additional_model = joblib.load(filename_marital)
                     explainer = shap.TreeExplainer(additional_model)
                     shap_values_marital = explainer.shap_values(pred_df)
@@ -3881,7 +3881,7 @@ if selected == 'Outil  Prédictif':
                     pred_df = pred_df.reset_index(drop=True)
               
                      # Conditions pour charger le modèle approprié
-                    filename_poutcome = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_poutcome_XGBOOST_quater.pkl"
+                    filename_poutcome = "XGBOOST_1_SD_model_PRED_poutcome_XGBOOST_quater.pkl"
                     additional_model = joblib.load(filename_poutcome)
                     explainer = shap.TreeExplainer(additional_model)
                     shap_values_poutcome = explainer.shap_values(pred_df)
@@ -3962,7 +3962,7 @@ if selected == 'Outil  Prédictif':
                     pred_df = pred_df.reset_index(drop=True)
               
                      # Conditions pour charger le modèle approprié
-                    filename_job = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_job_XGBOOST_1.pkl"
+                    filename_job = "XGBOOST_1_SD_model_PRED_job_XGBOOST_1.pkl"
                     additional_model = joblib.load(filename_job)
                     explainer = shap.TreeExplainer(additional_model)
                     shap_values_job = explainer.shap_values(pred_df)
@@ -4041,7 +4041,7 @@ if selected == 'Outil  Prédictif':
                     pred_df = pred_df.reset_index(drop=True)
                     
                      # Conditions pour charger le modèle approprié
-                    filename_client_category = "/Users/admin/Desktop/BANK_APP/XGBOOST_1_SD_model_PRED_client_category_XGBOOST_1.pkl"
+                    filename_client_category = "XGBOOST_1_SD_model_PRED_client_category_XGBOOST_1.pkl"
                     additional_model = joblib.load(filename_client_category)
                     explainer = shap.TreeExplainer(additional_model)
                     shap_values_client_category = explainer.shap_values(pred_df)
