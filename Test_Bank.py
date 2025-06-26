@@ -668,7 +668,7 @@ if selected == 'DataVisualisation':
                     st.markdown("P_value = 7.125338e-50  ➡️  **Il y a un lien significatif entre Previous et Deposit**") 
                     
                 if sub_pages1 == "Conclusion" :
-                    st.image("/Users/admin/Desktop/BANK_APP/recap_test_anova.png")
+                    # st.image("/Users/admin/Desktop/BANK_APP/recap_test_anova.png")
                     st.write("Au regard des p-values (qui sont toutes inférieures à 0.05), on peut conclure que **toutes les variables quantitatives ont un lien significatif avec notre variable cible.**")
                     st.write("____________________________________")
 
@@ -786,7 +786,7 @@ if selected == 'DataVisualisation':
     
                 if sub_pages2 == "Conclusion" :
     
-                    st.image("/Users/admin/Desktop/BANK_APP/recap_Chi-deux.png")
+                    # st.image("/Users/admin/Desktop/BANK_APP/recap_Chi-deux.png")
                     st.write("Au regard des p-values (qui sont toutes inférieures à 0.05), on peut conclure que **toutes les variables qualitatives ont un lien significatif avec notre variable cible.**")
                     st.write("____________________________________")
 
