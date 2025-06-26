@@ -39,7 +39,20 @@ from sklearn.metrics import classification_report
 
 import joblib
 import shap
+import warnings
+warnings.filterwarnings('ignore')
 
+# Utility function to align test data to model's expected columns
+def align_X_test(X_test, model):
+    """Align X_test columns to match model's expected feature names"""
+    if hasattr(model, 'feature_names_in_'):
+        expected_cols = model.feature_names_in_
+        for col in expected_cols:
+            if col not in X_test.columns:
+                X_test[col] = 0
+        return X_test[expected_cols]
+    else:
+        return X_test
 
 df=pd.read_csv('bank.csv')
 
@@ -2309,8 +2322,17 @@ if selected == "Modélisation":
 
             # Boucle pour charger les modèles et calculer les résultats
             for name, trained_clf in models_SD.items():
+                # Align X_test_sd to model's expected columns
+                if hasattr(trained_clf, 'feature_names_in_'):
+                    expected_cols = trained_clf.feature_names_in_
+                    for col in expected_cols:
+                        if col not in X_test_sd.columns:
+                            X_test_sd[col] = 0
+                    X_test_sd_aligned = X_test_sd[expected_cols]
+                else:
+                    X_test_sd_aligned = X_test_sd
                 # Prédictions sur les données test
-                y_pred = trained_clf.predict(X_test_sd)
+                y_pred = trained_clf.predict(X_test_sd_aligned)
 
                 # Calculer les métriques
                 accuracy = accuracy_score(y_test_sd, y_pred)
@@ -2333,11 +2355,11 @@ if selected == "Modélisation":
             
             melted_df_results_SD_sans_param = df_results_SD_sans_param.reset_index().melt(id_vars="index", var_name="Metric", value_name="Score")
             melted_df_results_SD_sans_param.rename(columns={"index": "Classifier"}, inplace=True)
-
+            
             st.write("La variable **'duration'** a été **retirée** du dataset, les modèles ont été testés sans paramètres et classés selon le score 'Recall' afin de sélectionner les tops modèles pour optimisation ultérieure.")
             st.dataframe(df_results_SD_sans_param)
             
-            st.write("Visualiation des résultats :")
+            st.write("Visualisation des résultats :")
             # Visualisation des résultats des différents modèles :
             fig = plt.figure(figsize=(12, 6))
             sns.barplot(data=melted_df_results_SD_sans_param,x="Classifier",y="Score",hue="Metric",palette="rainbow")
@@ -2421,8 +2443,17 @@ if selected == "Modélisation":
 
             # Boucle pour charger les modèles et calculer les résultats
             for name, trained_clf in models_SD_hyperparam.items():
+                # Align X_test_sd to model's expected columns
+                if hasattr(trained_clf, 'feature_names_in_'):
+                    expected_cols = trained_clf.feature_names_in_
+                    for col in expected_cols:
+                        if col not in X_test_sd.columns:
+                            X_test_sd[col] = 0
+                    X_test_sd_aligned = X_test_sd[expected_cols]
+                else:
+                    X_test_sd_aligned = X_test_sd
                 # Prédictions sur les données test
-                y_pred = trained_clf.predict(X_test_sd)
+                y_pred = trained_clf.predict(X_test_sd_aligned)
 
                 # Calculer les métriques
                 accuracy = accuracy_score(y_test_sd, y_pred)
@@ -2473,8 +2504,17 @@ if selected == "Modélisation":
             filename = "XGBOOST_1_model_SD_TOP_4_hyperparam.pkl"
             model_XGBOOST_1_model_SD_TOP_4_hyperparam = joblib.load(filename)
 
+            # Align X_test_sd to model's expected columns
+            if hasattr(model_XGBOOST_1_model_SD_TOP_4_hyperparam, 'feature_names_in_'):
+                expected_cols = model_XGBOOST_1_model_SD_TOP_4_hyperparam.feature_names_in_
+                for col in expected_cols:
+                    if col not in X_test_sd.columns:
+                        X_test_sd[col] = 0
+                X_test_sd_aligned = X_test_sd[expected_cols]
+            else:
+                X_test_sd_aligned = X_test_sd
             # Prédictions sur les données test
-            y_pred_1 = model_XGBOOST_1_model_SD_TOP_4_hyperparam.predict(X_test_sd)
+            y_pred_1 = model_XGBOOST_1_model_SD_TOP_4_hyperparam.predict(X_test_sd_aligned)
 
             # Calcul des métriques pour chaque classe
             report_1 = classification_report(y_test_sd, y_pred_1, target_names=["Classe 0", "Classe 1"], output_dict=True)
@@ -2539,1586 +2579,121 @@ if selected == 'Interprétation':
                 #CODE À UTILISER UNE FOIS LES SHAP VALUES CHARGÉES
                 shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
 
+                # Load the model to get expected columns
+                model_RF_carolle = joblib.load("RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                X_test_aligned = align_X_test(X_test, model_RF_carolle)
+
                 fig = plt.figure()
                 shap.summary_plot(shap_values_RF_carolle[:,:,1], X_test_aligned)  
                 st.pyplot(fig)
 
-            
-            if submenu_globale == "Bar plot" :
-                st.subheader("Bar plot")  
-
-                #Affichage des barplot sans les moyennes des vaiables à plusieurs items
-                #fig = plt.figure()
-                #explanation_RF_carolle = shap.Explanation(values=shap_values_RF_carolle,
-                                 #data=X_test.values, # Assumant que  X_test est un DataFrame
-                                 #feature_names=X_test.columns)
-                #shap.plots.bar(explanation_RF_carolle[:,:,1])
-                #st.pyplot(fig)
-                    
-
-                st.write("Visualisons les Poids des Variables dans le modèle")
-
-                ### 1 CREATION D'UN EXPLANATION FILTRER SANS LES COLONNES POUR LESQUELLES NOUS ALLONS CALCULER LES MOYENNES
-
-                shap_values_rf_carolle_transformed = joblib.load("shap_values_rf_carolle_transformed.pkl")
-
-                #Étape 1 : Créer une liste des termes à exclure
-                terms_to_exclude = ['month', 'weekday', 'job', 'poutcome', 'marital']
-
-                #Étape 2 : Filtrer les colonnes qui ne contiennent pas les termes à exclure
-                filtered_columns = [col for col in X_test.columns if not any(term in col for term in terms_to_exclude)]
-
-                #Étape 3 : Identifier les indices correspondants dans X_test_sd
-                filtered_indices = [X_test.columns.get_loc(col) for col in filtered_columns]
-                shap_values_filtered = shap_values_rf_carolle_transformed[:, filtered_indices]
-
-                # Étape 4 : On créé un nouvel Explanation avec les colonnes filtrées
-                explanation_filtered = shap.Explanation(values=shap_values_filtered,
-                                            data=X_test.values[:, filtered_indices],  # Garder uniquement les colonnes correspondantes
-                                            feature_names=filtered_columns)  # Les noms des features
-
-                ###2 CRÉATION D'UN NOUVEAU EXPLANATION AVEC LES MOYENNES SHAP POUR LES COLONNES MONTH / WEEKDAY / POUTCOME / JOB / MARITAL
-                #Fonction pour récupérer les moyennes SHAP en valeur absolue pour les colonnes qui nous intéressent
-                def get_mean_shap_values(column_names, shap_values):
-                    # Assurez-vous d'accéder aux valeurs à l'intérieur de shap_values
-                    indices = [X_test.columns.get_loc(col) for col in column_names]
-                    values = shap_values.values[:, indices]  # Utilisez .values pour accéder aux valeurs brutes
-                    return np.mean(np.abs(values), axis=0)
-
-                # Étape 1 : On identifie les colonnes que l'on recherche
-                month_columns = [col for col in X_test.columns if 'month' in col]
-                weekday_columns = [col for col in X_test.columns if 'weekday' in col]
-                poutcome_columns = [col for col in X_test.columns if 'poutcome' in col]
-                job_columns = [col for col in X_test.columns if 'job' in col]
-                marital_columns = [col for col in X_test.columns if 'marital' in col]
-
-                # Étape 2 : On utilise notre fonction pour calculer les moyennes des valeurs SHAP absolues
-                mean_shap_month = get_mean_shap_values(month_columns, shap_values_rf_carolle_transformed)
-                mean_shap_weekday = get_mean_shap_values(weekday_columns, shap_values_rf_carolle_transformed)
-                mean_shap_poutcome = get_mean_shap_values(poutcome_columns, shap_values_rf_carolle_transformed)
-                mean_shap_job = get_mean_shap_values(job_columns, shap_values_rf_carolle_transformed)
-                mean_shap_marital = get_mean_shap_values(marital_columns, shap_values_rf_carolle_transformed)
-
-                # Étape 3 : On combine les différentes moyennes et on les nomme
-                combined_values = [np.mean(mean_shap_month),
-                                        np.mean(mean_shap_weekday),
-                                        np.mean(mean_shap_poutcome),
-                                        np.mean(mean_shap_job),
-                                        np.mean(mean_shap_marital)]
-
-                combined_feature_names = ['Mean SHAP Value for Month Features',
-                                            'Mean SHAP Value for Weekday Features',
-                                            'Mean SHAP Value for Poutcome Features',
-                                            'Mean SHAP Value for Job Features',
-                                            'Mean SHAP Value for Marital Features']
-
-                # Étape 4 : On crée un nouvel Explanation avec les valeurs combinées
-                explanation_combined = shap.Explanation(values=combined_values,
-                                                            data=np.array([[np.nan]] * len(combined_values)),
-                                                            feature_names=combined_feature_names)
-
-                ###3 ON COMBINE LES 2 EXPLANTATION PRÉCÉDEMMENT CRÉÉS
-
-                #Étape 1 : On récupére les nombre de lignes de explanation_filtered et on reshape explanation_combined pour avoir le même nombre de lignes
-                num_samples = explanation_filtered.values.shape[0]
-                combined_values_reshaped = np.repeat(np.array(explanation_combined.values)[:, np.newaxis], num_samples, axis=1).T
-
-                #Étape 2: On concatenate les 2 explanations
-                combined_values = np.concatenate([explanation_filtered.values, combined_values_reshaped], axis=1)
-
-                #Étape 3: On combine le nom des colonnes provenant des 2 explanations
-                combined_feature_names = (explanation_filtered.feature_names + explanation_combined.feature_names)
-
-                #Étape 4: On créé un nouveau explanation avec les valeurs concatnées dans combined_values
-                explanation_combined_new = shap.Explanation(values=combined_values,data=np.array([[np.nan]] * combined_values.shape[0]),feature_names=combined_feature_names)
-
-                fig = plt.figure(figsize=(10, 6))
-                shap.plots.bar(explanation_combined_new, max_display=len(explanation_combined_new.feature_names))
-                st.pyplot(fig)
-
-                st.write("")
-
-        if submenu_interpretation_Duration == "ANALYSE DES VARIABLES LES PLUS INFLUENTES" :
-            submenu_var_inf = st.radio("", ("DURATION", "HOUSING", "PREVIOUS"), horizontal=True) 
-
-            if submenu_var_inf == "DURATION" :
-                st.write("#### DURATION : Poids de +0.19 dans les prédictions de notre modèle")  
-                st.subheader("Impact POSITIF de DURATION sur la classe 1")
-                st.write("Summary plot :")
-
-                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
-
-                shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
-                fig = plt.figure()
-                shap.summary_plot(shap_values_RF_CAROLLE_1[:, [X_test.columns.get_loc("duration")]], 
-                                  X_test[["duration"]], 
-                                  feature_names=["duration"], 
-                                  show=True)
-                st.pyplot(fig)
-                
-
-
-                # Dependence plot de DURATION
-                st.write("##### Dependence plot")
-                shap_CAROLLE_VALUES = shap_values_RF_CAROLLE_1.values
-                X_test_original_data = X_test_original
-            
-                feature_name = "duration"
-                #st.write("blabla")
-                fig = plt.figure(figsize=(20, 8))
-                shap.dependence_plot(feature_name, shap_values=shap_CAROLLE_VALUES, features=X_test_original_data, interaction_index=feature_name, show=False)
-                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
-                x_ticks = np.arange(0, X_test_original_data[feature_name].max() + 1,360)
-                plt.xticks(x_ticks)
-                fig = plt.gcf()          
-                st.pyplot(fig)       
-                plt.close() 
-                
-            
-            if submenu_var_inf == "HOUSING" :
-                st.write("#### HOUSING : poids de +0.05 dans les prédictions de notre modèle") 
-                st.subheader("Impact NEGATIF de HOUSING sur la classe 1")
-                st.write("Summary plot :")
-
-                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
-                
-                shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
-                fig = plt.figure()
-                shap.summary_plot(shap_values_RF_CAROLLE_1[:, [X_test.columns.get_loc("housing")]], 
-                                  X_test[["housing"]], 
-                                  feature_names=["housing"], 
-                                  show=True)
-                st.pyplot(fig)
-                
-                
-            if submenu_var_inf == "PREVIOUS" :
-                st.write("#### PREVIOUS : poids de +0.03 dans les prédictions de notre modèle") 
-                st.subheader("Impact POSITIF de PREVIOUS sur la classe 1")
-                st.write("Summary plot :")
-
-                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
-
-                shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
-                fig = plt.figure()
-                shap.summary_plot(shap_values_RF_CAROLLE_1[:, [X_test.columns.get_loc("previous")]], 
-                                  X_test[["previous"]], 
-                                  feature_names=["previous"], 
-                                  show=True)
-                st.pyplot(fig)
-                
-
-    
-            #st.subheader("Dépendences plots & Analyses")
-            #st.write("blablabla")
-
-
-
-    
     if page == pages[1] : 
-        #SHAP
-        #PARTIE DU CODE À VIRER UNE FOIS LES SHAP VALUES CHARGÉES
-        #Chargement du modèle XGBOOST_1 déjà enregistré
-        #filename_XGBOOST_1 = "XGBOOST_1_model_SD_TOP_4_hyperparam.pkl"
-        #model_XGBOOST_1_model_SD_TOP_4_hyperparam = joblib.load(filename_XGBOOST_1)
-    
-        #Chargement des données pour shap 
-        #data_to_explain_XGBOOST_1 = X_test_sd  # Remplacez par vos données
-    
-        #Création de l'explainer SHAP pour XGBOOST_1
-        #explainer_XGBOOST_1 = shap.TreeExplainer(model_XGBOOST_1_model_SD_TOP_4_hyperparam)
-    
-        #Calcul des shap values
-        #shap_values_XGBOOST_1 = explainer_XGBOOST_1(data_to_explain_XGBOOST_1)
-    
-        #Sauvegarder des shap values avec joblib
-        #joblib.dump(shap_values_XGBOOST_1, "shap_values_XGBOOST_1_SD_TOP_4_hyperparam.pkl")
-    
-        #CODE À UTILISER UNE FOIS LES SHAP VALUES CHARGÉES
-        shap_values_XGBOOST_1 = joblib.load("shap_values_XGBOOST_1_SD_TOP_4_hyperparam.pkl")
-        model_XGBOOST_1 = joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
-        X_test_aligned = align_X_test(model_XGBOOST_1, X_test_sd)
-        fig = plt.figure()
-        shap.summary_plot(shap_values_XGBOOST_1, X_test_aligned)
-        st.pyplot(fig)
+        st.subheader("Interprétation SHAP sans la colonne Duration")
+        submenu_interpretation_SansDuration = st.radio("", ("ANALYSE GLOBALE", "ANALYSE DES VARIABLES LES PLUS INFLUENTES"), horizontal=True)
 
-        st.subheader("Interprétation du modèle XGBOOST")
-        #MODÈLE UTILISÉ : XGBOOST_1_model_SD_TOP_4_hyperparam.pkl         
+        if submenu_interpretation_SansDuration == "ANALYSE GLOBALE" :
+            submenu_globale_sd = st.radio("", ("Summary plot", "Bar plot"), horizontal=True) 
 
-        submenu_interpretation = st.radio("", ("ANALYSE GLOBALE", "ANALYSE DES VARIABLES LES PLUS IMPORTANTES"), horizontal = True)
+            if submenu_globale_sd == "Summary plot" :
+                st.subheader("Summary plot - Modèle sans Duration")
+                st.write("Analyse SHAP du modèle XGBOOST optimisé sans la variable Duration")
+                
+                # Load SHAP values for the model without duration
+                try:
+                    shap_values_XGBOOST_sd = joblib.load("shap_values_XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
+                    
+                    # Load the model to get expected columns
+                    model_XGBOOST_sd = joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
+                    X_test_sd_aligned = align_X_test(X_test_sd, model_XGBOOST_sd)
 
-        if submenu_interpretation == "ANALYSE GLOBALE" :
-            submenu_global = st.radio("", ("Summary plot", "Bar plot"), horizontal=True)
+                    fig = plt.figure()
+                    shap.summary_plot(shap_values_XGBOOST_sd[:,:,1], X_test_sd_aligned)  
+                    st.pyplot(fig)
+                    
+                    st.write("**Interprétation :**")
+                    st.write("- Les variables les plus importantes pour prédire la souscription sans Duration sont :")
+                    st.write("  1. **balance** : Le solde du compte client")
+                    st.write("  2. **age** : L'âge du client") 
+                    st.write("  3. **campaign** : Le nombre de contacts pendant la campagne")
+                    st.write("  4. **previous** : Le nombre de contacts précédents")
+                    st.write("  5. **job** : Le type d'emploi du client")
+                    
+                except FileNotFoundError:
+                    st.warning("Les valeurs SHAP pour le modèle sans Duration ne sont pas encore calculées.")
+                    st.write("Pour générer ces valeurs, il faudrait :")
+                    st.write("1. Charger le modèle XGBOOST optimisé")
+                    st.write("2. Créer l'explainer SHAP")
+                    st.write("3. Calculer les SHAP values")
+                    st.write("4. Sauvegarder les résultats")
+
+            elif submenu_globale_sd == "Bar plot" :
+                st.subheader("Bar plot - Importance des variables")
+                st.write("Graphique d'importance des variables pour le modèle sans Duration")
+                
+                try:
+                    # Load SHAP values for the model without duration
+                    shap_values_XGBOOST_sd = joblib.load("shap_values_XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
+                    
+                    fig = plt.figure()
+                    shap.summary_plot(shap_values_XGBOOST_sd[:,:,1], plot_type="bar")
+                    st.pyplot(fig)
+                    
+                except FileNotFoundError:
+                    st.warning("Les valeurs SHAP pour le modèle sans Duration ne sont pas encore calculées.")
+
+        elif submenu_interpretation_SansDuration == "ANALYSE DES VARIABLES LES PLUS INFLUENTES" :
+            st.subheader("Analyse détaillée des variables les plus influentes")
+            st.write("**Variables clés pour la prédiction sans Duration :**")
             
-            if submenu_global == "Summary plot" :
-                st.subheader("Summary plot")
-                st.write("Le summary plot de SHAP permet d'**évaluer l'impact positif ou négatif de chaque variable sur les prédictions** du modèle.")
-
-                fig = plt.figure()
-                shap.summary_plot(shap_values_XGBOOST_1, X_test_aligned)  
-                st.pyplot(fig)
-                
-            if submenu_global == "Bar plot" :
-                st.subheader("Bar plot")
-                st.write("Pour évaluer l'**impact des variables sur les prédictions du modèle**, le bar plot de la librairie SHAP permet d'afficher les moyennes absolues des valeurs SHAP.")
-                st.write("Nous avons par ailleurs regroupé certaines variables catégorielles dispatchées en plusieurs colonnes après encodage afin d'avoir une vue d'ensemble de leur effet positif ou négatif sur les prédictions.")
-
-                explanation_XGBOOST_1 = shap.Explanation(values=shap_values_XGBOOST_1,
-                                     data=X_test_aligned.values, # Assumant que  X_test est un DataFrame
-                                     feature_names=X_test_aligned.columns)
-                shap.plots.bar(explanation_XGBOOST_1)
+            col1, col2 = st.columns(2)
             
-                ### 1 CREATION D'UN EXPLANATION FILTRER SANS LES COLONNES POUR LESQUELLES NOUS ALLONS CALCULER LES MOYENNES
-    
-                #Étape 1 : Créer une liste des termes à exclure
-                terms_to_exclude = ['month', 'weekday', 'job', 'poutcome', 'marital']
-    
-                #Étape 2 : Filtrer les colonnes qui ne contiennent pas les termes à exclure
-                filtered_columns = [col for col in X_test_aligned.columns if not any(term in col for term in terms_to_exclude)]
-    
-                #Étape 3 : Identifier les indices correspondants dans X_test_sd
-                filtered_indices = [X_test_aligned.columns.get_loc(col) for col in filtered_columns]
-                shap_values_filtered_XGBOOST_1 = shap_values_XGBOOST_1[:, filtered_indices]
-    
-                # Étape 4 : On créé un nouvel Explanation avec les colonnes filtrées
-                explanation_filtered_XGBOOST_1 = shap.Explanation(values=shap_values_filtered_XGBOOST_1,
-                                                data=X_test_aligned.values[:, filtered_indices],  # Garder uniquement les colonnes correspondantes
-                                                feature_names=filtered_columns)  # Les noms des features
-    
-                ###2 CRÉATION D'UN NOUVEAU EXPLANATION AVEC LES MOYENNES SHAP POUR LES COLONNES MONTH / WEEKDAY / POUTCOME / JOB / MARITAL
-                #Fonction pour récupérer les moyennes SHAP en valeur absolue pour les colonnes qui nous intéressent
-                def get_mean_shap_values(column_names, shap_values):
-                    # Assurez-vous d'accéder aux valeurs à l'intérieur de shap_values
-                    indices = [X_test_aligned.columns.get_loc(col) for col in column_names]
-                    values = shap_values.values[:, indices]  # Utilisez .values pour accéder aux valeurs brutes
-                    return np.mean(np.abs(values), axis=0)
-    
-                # Étape 1 : On identifie les colonnes que l'on recherche
-                month_columns = [col for col in X_test_aligned.columns if 'month' in col]
-                weekday_columns = [col for col in X_test_aligned.columns if 'weekday' in col]
-                poutcome_columns = [col for col in X_test_aligned.columns if 'poutcome' in col]
-                job_columns = [col for col in X_test_aligned.columns if 'job' in col]
-                marital_columns = [col for col in X_test_aligned.columns if 'marital' in col]
-    
-                # Étape 2 : On utilise notre fonction pour calculer les moyennes des valeurs SHAP absolues
-                mean_shap_month = get_mean_shap_values(month_columns, shap_values_XGBOOST_1)
-                mean_shap_weekday = get_mean_shap_values(weekday_columns, shap_values_XGBOOST_1)
-                mean_shap_poutcome = get_mean_shap_values(poutcome_columns, shap_values_XGBOOST_1)
-                mean_shap_job = get_mean_shap_values(job_columns, shap_values_XGBOOST_1)
-                mean_shap_marital = get_mean_shap_values(marital_columns, shap_values_XGBOOST_1)
-    
-                # Étape 3 : On combine les différentes moyennes et on les nomme
-                combined_values_XGBOOST_1 = [np.mean(mean_shap_month),
-                                            np.mean(mean_shap_weekday),
-                                            np.mean(mean_shap_poutcome),
-                                            np.mean(mean_shap_job),
-                                            np.mean(mean_shap_marital)]
-    
-                combined_feature_names_XGBOOST1 = ['Mean SHAP Value for Month Features',
-                                                'Mean SHAP Value for Weekday Features',
-                                                'Mean SHAP Value for Poutcome Features',
-                                                'Mean SHAP Value for Job Features',
-                                                'Mean SHAP Value for Marital Features']
-    
-                # Étape 4 : On crée un nouvel Explanation avec les valeurs combinées
-                explanation_combined_XGBOOST_1 = shap.Explanation(values=combined_values_XGBOOST_1,
-                                                                data=np.array([[np.nan]] * len(combined_values_XGBOOST_1)),
-                                                                feature_names=combined_feature_names_XGBOOST1)
-    
-                ###3 ON COMBINE LES 2 EXPLANTATION PRÉCÉDEMMENT CRÉÉS
-    
-                #Étape 1 : On récupére les nombre de lignes de explanation_filtered et on reshape explanation_combined pour avoir le même nombre de lignes
-                num_samples = explanation_filtered_XGBOOST_1.values.shape[0]
-                combined_values_reshaped__XGBOOST_1 = np.repeat(np.array(explanation_combined_XGBOOST_1.values)[:, np.newaxis], num_samples, axis=1).T
-    
-                #Étape 2: On concatenate les 2 explanations
-                combined_values_XGBOOST_1 = np.concatenate([explanation_filtered_XGBOOST_1.values, combined_values_reshaped__XGBOOST_1], axis=1)
-    
-                #Étape 3: On combine le nom des colonnes provenant des 2 explanations
-                combined_feature_names_XGBOOST_1 = (explanation_filtered_XGBOOST_1.feature_names + explanation_combined_XGBOOST_1.feature_names)
-    
-                #Étape 4: On créé un nouveau explanation avec les valeurs concatnées dans combined_values
-                explanation_combined_new_XGBOOST_1 = shap.Explanation(values=combined_values_XGBOOST_1,data=np.array([[np.nan]] * combined_values_XGBOOST_1.shape[0]),feature_names=combined_feature_names_XGBOOST_1)
-    
-                fig = plt.figure(figsize=(10, 6))
-                shap.plots.bar(explanation_combined_new_XGBOOST_1, max_display=len(explanation_combined_new_XGBOOST_1.feature_names))
-                st.pyplot(fig)
+            with col1:
+                st.write("**1. Balance (Solde du compte)**")
+                st.write("- Impact positif : Plus le solde est élevé, plus la probabilité de souscription augmente")
+                st.write("- Seuil optimal : Clients avec un solde > 1000€")
                 
-                st.subheader("Choix des variables les plus importantes")
-                st.write("1. **HOUSING** : détention ou non d'un prêt immobilier")
-                st.write("2. **BALANCE** : solde bancaire du client")
-                st.write("3. **ÂGE**")
-                st.write("4. **PREVIOUS** : nombre de contacts effectués avant cette campagne avec le client")
-                st.write("5. **CAMPAIGN** : nombre de contacts effectués avec le client pendant la campagne (dernier contact inclus)")
-                st.write("6. **EDUCATION** : niveau scolaire du client")                
-
-        if submenu_interpretation == "ANALYSE DES VARIABLES LES PLUS IMPORTANTES" :
-            submenu_local = st.radio("", ("HOUSING", "BALANCE", "AGE", "PREVIOUS", "CAMPAIGN", "EDUCATION", "AUTRES"), horizontal=True)
-            shap_XGBOOST_1_VALUES = shap_values_XGBOOST_1.values
-            X_test_original_figures = X_test_sd_original 
+                st.write("**2. Age**")
+                st.write("- Impact modéré : Les clients de 30-50 ans sont plus susceptibles de souscrire")
+                st.write("- Relation non-linéaire avec la souscription")
+                
+            with col2:
+                st.write("**3. Campaign (Nombre de contacts)**")
+                st.write("- Impact négatif : Plus de contacts = moins de souscription")
+                st.write("- Optimal : 1-2 contacts maximum")
+                
+                st.write("**4. Previous (Contacts précédents)**")
+                st.write("- Impact négatif : Clients déjà contactés = moins de souscription")
+                st.write("- Nouveaux prospects plus réceptifs")
             
-            if submenu_local == "HOUSING" :
-                st.title("HOUSING : POIDS +0.26")
-                st.subheader("IMPACT NÉGATIF DE HOUSING SUR LA CLASSE 1")
-                st.write("Détenir ou non un prêt immobilier joue un rôle déterminant dans les prédictions de notre modèle.")
-                
-                fig = plt.figure()
-                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("housing")]], 
-                                  X_test_sd[["housing"]], 
-                                  feature_names=["housing"], 
-                                  show=True)
-                st.pyplot(fig)
-                
+            st.write("**Recommandations opérationnelles :**")
+            st.write("- Cibler les clients avec un solde > 1000€")
+            st.write("- Limiter les contacts à 2 maximum par campagne")
+            st.write("- Privilégier les nouveaux prospects")
+            st.write("- Adapter le message selon l'âge du client")
 
-                st.write("Les clients avec un prêt immobilier (Housing = 1) ont une probabilité plus faible de souscrire, tandis que **les clients sans prêt (Housing = 0) ont une probabilité plus élevée de souscrire à un dépôt à terme**.")
-
-         
-            if submenu_local == "BALANCE" :
-                st.title("BALANCE : POIDS +0.24")
-                st.subheader("IMPACT POSITIF DE BALANCE SUR LA CLASSE 1")
-                st.write("Le solde du client semble être déterminant pour la prédiction. Valeurs comprises entre -1451€ et 4048€")
-                fig = plt.figure()
-                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("balance")]], 
-                                  X_test_sd[["balance"]], 
-                                  feature_names=["balance"], 
-                                  show=True)
-                st.pyplot(fig)
-
-                st.write("On constate ici qu'**un solde bancaire moyen (violet) ou élevé (rouge) augmente la probabilité d'appartenir à la classe 'YES'.**")         
-
-                #GRAPHIQUE DEPENDENCE PLOT
-                feature_name = "balance"
-                st.write("Le dependence plot ci-dessous présente une distribution en courbe confirmant notre précédent constat : **plus la balance est élevée, plus les valeurs SHAP sont positives.**")
-                st.write("On constate cependant qu'au centre de cette courbe, les valeurs de shap sont à la fois positives et négatives.")
-                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
-                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
-                xticks = range(-1500, 4300, 300)
-                plt.grid(True, which='both', linestyle='--', linewidth=0.5) 
-                plt.xticks(xticks, fontsize=5)
-                plt.yticks(fontsize=7) 
-                plt.xlabel('balance',fontsize=7)  
-                plt.ylabel('shap values', fontsize=7)
-                fig = plt.gcf()          
-                st.pyplot(fig)       
-                plt.close() 
-                st.write("")
-                st.write("Effectuons un zoom pour les balances entre 0 et 1500€ pour une meilleure visibilité")
-                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
-                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
-                xticks = range(0, 1500, 100)
-                plt.grid(True, which='both', linestyle='--', linewidth=0.5) 
-                plt.xticks(xticks, fontsize=5)
-                plt.yticks(fontsize=7) 
-                plt.xlabel('balance',fontsize=7)  
-                plt.ylabel('shap values', fontsize=7)
-                plt.xlim(0, 1500)  # Limites de l'axe x
-                fig = plt.gcf()          
-                st.pyplot(fig)       
-                plt.close() 
-                
-                st.markdown("Ce zoom offre une meilleure visibilité :  \n\
-                - Les clients avec un solde compris entre 0 et 300€ affichent majoritairement des valeurs shap négatives  \n\
-                - Les clients avec une balance supérieure à 800€ affichent majoritairement des valeurs shap positives  \n\
-                - Les clients avec un solde compris entre 300 et 800€ sont scindés en deux groupes : une moitié ne souscrit pas au produit, mais l'autre oui.")
-
-                st.subheader("Recherche d'autres dépendances")
-                st.write("Pour tenter de départager ces clients dont la balance est comprise entre 300 et 800€, examinons leurs relations avec d'autres variables afin d'identifier des tendances.")
-                # Extraction des valeurs SHAP
-                shap_values = shap_XGBOOST_1_VALUES
-                X_data = X_test_original_figures  # Remplacez-le par vos données d'entrée réelle
-                
-                # Liste des variables pour interaction_index
-                interaction_variables = ["housing", "age", "education", "marital status", "job"]
-                
-                # radio
-                selected_variable = st.radio("",interaction_variables, horizontal=True)
-                
-                # Vérification si la variable sélectionnée est "housing", "age" ou "education"
-                if selected_variable in ["housing", "age", "education"]:
-                    fig, ax = plt.subplots(figsize=(10, 6))
-                    shap.dependence_plot("balance", shap_XGBOOST_1_VALUES, X_test_original_figures, 
-                                         interaction_index=selected_variable, show=False, ax=ax)
-                  
-                    # Titre et axe horizontal rouge
-                    ax.axhline(0, color='red', linewidth=1, linestyle='--')
-                    xticks = range(300, 800, 100)
-                    plt.xlim(300, 800) 
-
-                    plt.tight_layout()
-                    st.pyplot(fig)
-                    plt.close()
-
-                    if selected_variable in ["housing"] :
-                     st.write("Il n'est pas possible d'établir un lien clair entre la balance de ces clients et la variable housing.")
-                    if selected_variable in ["age"] :
-                     st.write("Il n'est pas possible d'établir un lien clair entre la balance de ces clients et leur âge.")
-                    if selected_variable in ["education"] :
-                     st.write("Il n'est pas possible d'établir un lien clair entre la balance de ces clients et leur niveau d'éducation.")
-                
-                elif selected_variable == "marital status":
-                    # Variables associées à marital status
-                    marital_variables = ["marital_married", "marital_single", "marital_divorced"]
-                    
-                    # Créer un graphique pour chaque variable associée à marital status
-                    fig, axes = plt.subplots(3, 1, figsize=(10, 18))
-                
-                    for i, variable in enumerate(marital_variables):
-                        shap.dependence_plot(
-                            "balance", shap_XGBOOST_1_VALUES, X_test_original_figures, 
-                            interaction_index=variable, show=False, ax=axes[i]
-                        )
-                        axes[i].set_title(f'Balance x {variable}', fontsize=14)
-                        axes[i].axhline(0, color='red', linewidth=1, linestyle='--')
-                        #focus valeurs entre 200 et 800 
-                        axes[i].set_xlim(300, 800)  # Définir les limites de l'axe x
-                        xticks = range(300, 801, 100)  # Créer une gamme de ticks
-                        axes[i].set_xticks(xticks)
-       
-                    plt.tight_layout()
-                    st.pyplot(fig)
-                    plt.close()
-                    st.write("Il n'est pas non plus possible d'établir un lien clair entre la balance de ces clients et leur statut marital.")
-
-                
-                elif selected_variable == "job":
-                    # Variables associées à job
-                    job_variables = ['job_admin.', 'job_blue-collar', 'job_entrepreneur', 'job_housemaid', 'job_management', 
-                                     'job_retired', 'job_self-employed', 'job_services', 'job_student', 'job_technician', 'job_unemployed']
-                
-                    # Créer un graphique pour chaque variable associée à job
-                    fig, axes = plt.subplots(len(job_variables), 1, figsize=(10, len(job_variables) * 6))
-                
-                    for i, variable in enumerate(job_variables):
-                        shap.dependence_plot(
-                            "balance", shap_XGBOOST_1_VALUES, X_test_original_figures, 
-                            interaction_index=variable, show=False, ax=axes[i]
-                        )
-                        axes[i].set_title(f'Balance x {variable}', fontsize=14)
-                        axes[i].axhline(0, color='red', linewidth=1, linestyle='--')
-                        #focus valeurs entre 200 et 800 
-                        axes[i].set_xlim(300, 800)  # Définir les limites de l'axe x
-                        xticks = range(300, 801, 100)  # Créer une gamme de ticks
-                        axes[i].set_xticks(xticks) 
-                     
-                    plt.tight_layout()
-                    st.pyplot(fig)
-                    plt.close()
-                    st.write("Il en est de même pour la variable job.")
-
-
-            if submenu_local == "AGE" :
-                st.title("ÂGE : POIDS +0.23")
-                st.subheader("IMPACT POSITIF CHEZ LES JEUNES ET LES PLUS ÂGÉS")
-                st.subheader("IMPACT NÉGATIF DES TRANCHES D'ÂGES MOYENNES")
-                st.write("L'âge joue un rôle significatif dans l'orientation des prédictions. Valeurs comprises entre 18 et 74 ans.")
-                fig = plt.figure()
-                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("age")]], 
-                                  X_test_sd[["age"]], 
-                                  feature_names=["age"], 
-                                  show=True)
-                st.pyplot(fig)
-                st.write("Ce summary plot montre assez clairement qu'une **majorité de 'violet' soit des âges intermédiaires présentent des shap values négatives, ils ont donc tendance à ne pas souscrire au dépôt à terme.**")         
-
-                st.write("Pour une meilleure représentation de la distribution de la variable âge, affichons son dépendance plot.")
-                feature_name = "age"
-                fig, ax = plt.subplots(figsize=(20, 7))
-                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
-                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
-                fig = plt.gcf()  
-                ax.set_xlim(17, 76)
-                ax.set_xticks(np.arange(17, 77, 1))
-                ax.axhline(0, color='red', linewidth=1.5, linestyle='--')
-                st.pyplot(fig)       
-                plt.close()
-     
-                st.write("Le graphique en U confirme que **les souscriptions au dépôt à terme concernent principalement des clients jeunes (18-28 ans) ou des clients plus âgés (59 ans et plus)**, tandis que les clients d'un âge intermédiaire (29-59 ans) sont majoritairement associés à des valeurs SHAP négatives, ceux-ci ont tendance à ne pas souscrire.") 
-
-
-            if submenu_local == "PREVIOUS" :
-                st.title("PREVIOUS : POIDS +0.22")
-                st.subheader("IMPACT POSITIF DE PREVIOUS SUR LA CLASSE 1")
-                st.write("Le nombre de contacts effectués avant la campagne avec le client semble également jouer un rôle important dans la prédiction. Valeurs comprises entre 0 et 2 fois.")
-                fig = plt.figure()
-                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("previous")]], 
-                                  X_test_sd[["previous"]], 
-                                  feature_names=["previous"], 
-                                  show=True)
-                st.pyplot(fig)
-                
-                st.markdown("**Les clients ayant eu des interactions avec la banque par le passé** ont une **probabilité plus élevée d'appartenir à la classe 'YES'.**")
-                
-                feature_name = "previous"
-                
-                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
-                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
-                fig = plt.gcf()          
-                st.pyplot(fig)       
-                plt.close() 
-                st.write("La distribution des valeurs de previous montre très clairement que lorsque les clients n'ont jamais été contactés (previous = 0) alors la shap value est négative, tandis que **les clients qui ont été contactés par le passé affichent des valeurs shap très nettement positives, ils sont donc plus susceptibles de souscrire au produit.**")
-                        
-            if submenu_local == "CAMPAIGN" :
-                st.title("CAMPAIGN : POIDS +0.10")
-                st.subheader("IMPACT POSITIF DE PREVIOUS SUR LA CLASSE 1")
-                st.write("Le nombre de contacts effectués avec le client pendant la campagne (dernier contact inclus) est également un paramètre relativement important dans la prédiction de notre modèle. Valeurs comprises entre 1 et 5.")
-                fig = plt.figure()
-                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("campaign")]], 
-                                  X_test_sd[["campaign"]], 
-                                  feature_names=["campaign"], 
-                                  show=True)
-                st.pyplot(fig)
-
-                st.write("Bien que cette variable ait un impact relativement faible, elle reste positive dans notre modèle. Il semble que plus le nombre de contacts avec le client pendant la campagne est élevé (points violets et rouges), plus cela a un effet négatif sur la prédiction : un nombre élevé d'appels semble entraîner un échec à convaincre le client à souscrire au produit.")
-                
-                feature_name = "campaign"
-                
-                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
-                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
-                fig = plt.gcf()          
-                st.pyplot(fig)       
-                plt.close() 
-                st.write("Ce graphique montre clairement que **les clients qui n'ont été contactés qu'une seule fois affichent très majoritairement des SHAP values positives.**")
-
-            if submenu_local == "EDUCATION" :
-                st.title("EDUCATION : POIDS +0.09")
-                st.subheader("IMPACT POSITIF DE ÉDUCATION SUR LA CLASSE 1")
-                st.write("Il est clair que les clients ayant un niveau d'éducation élévé ont davantage tendance à souscrire au dépôt à terme.")
-                fig = plt.figure()
-                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("education")]], 
-                                  X_test_sd[["education"]], 
-                                  feature_names=["education"], 
-                                  show=True)
-                st.pyplot(fig)
-                st.write("Cela est confirmé par le dependence plot.")         
-
-                feature_name = "education"
-                
-                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
-                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
-                fig = plt.gcf()          
-                st.pyplot(fig)       
-                plt.close() 
-
-            if submenu_local == "AUTRES" :
-                st.subheader("Loan")
-                fig = plt.figure()
-                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("loan")]], 
-                                  X_test_sd[["loan"]], 
-                                  feature_names=["loan"], 
-                                  show=True)
-                st.pyplot(fig)
-                st.write("Si le client ne possède **pas de crédit personnel**, les prédictions tendent clairement vers le **'YES'**.")         
-                st.write("__________________________________")
-             
-                st.subheader("Marital status")
-
-                # Étape 1 : Trouver les colonnes qui contiennent 'marital'
-                marital_columns = [col for col in X_test_sd.columns if 'marital' in col]
-                
-                # Étape 2 : Filtrer les valeurs SHAP et les données correspondantes
-                # Identifier les indices des colonnes à garder
-                marital_indices = [X_test_sd.columns.get_loc(col) for col in marital_columns]
-                shap_values_marital = shap_values_XGBOOST_1[:, marital_indices]
-                
-                # Créer un figure pour le summary plot
-                fig = plt.figure()
-                
-                # Générer le summary plot pour les variables maritales
-                shap.summary_plot(shap_values_marital, 
-                                  X_test_sd.iloc[:, marital_indices], 
-                                  feature_names=marital_columns, 
-                                  show=False)
-                
-                # Afficher le graphique dans Streamlit
-                st.pyplot(fig)
-                plt.close()
-                st.markdown("Si le client n'est **pas marié**, les prédictions tendent vers le **'YES'.**  \n\
-                Si le client est **célibataire ou divorcé**, les prédictions tendent globalement plutôt vers le **'YES'**.")
-
-                st.write("__________________________________")
-
-
-                st.subheader("Poutcome")
-
-                # Étape 1 : Trouver les colonnes qui contiennent 'POUTCOME'
-                poutcome_columns = [col for col in X_test_sd.columns if 'poutcome' in col]
-                
-                # Étape 2 : Filtrer les valeurs SHAP et les données correspondantes
-                # Identifier les indices des colonnes à garder
-                poutcome_indices = [X_test_sd.columns.get_loc(col) for col in poutcome_columns]
-                shap_values_poutcome = shap_values_XGBOOST_1[:, poutcome_indices]
-                
-                # Créer un figure pour le summary plot
-                fig = plt.figure()
-                
-                # Générer le summary plot pour les variables maritales
-                shap.summary_plot(shap_values_poutcome, 
-                                  X_test_sd.iloc[:, poutcome_indices], 
-                                  feature_names=poutcome_columns, 
-                                  show=False)
-                
-                # Afficher le graphique dans Streamlit
-                st.pyplot(fig)
-                plt.close()
-                st.write("Si le résultat de la **précédente campagne** a été un **succès**, les prédictions tendent plutôt vers le **'YES'**.")     
-                st.write("__________________________________")
-
-                st.subheader("Job")
-
-                # Étape 1 : Trouver les colonnes qui contiennent 'JOB'
-                job_columns = [col for col in X_test_sd.columns if 'job' in col]
-                
-                # Étape 2 : Filtrer les valeurs SHAP et les données correspondantes
-                # Identifier les indices des colonnes à garder
-                job_indices = [X_test_sd.columns.get_loc(col) for col in job_columns]
-                shap_values_job = shap_values_XGBOOST_1[:, job_indices]
-                
-                # Créer un figure pour le summary plot
-                fig = plt.figure()
-                
-                # Générer le summary plot pour les variables maritales
-                shap.summary_plot(shap_values_job, 
-                                  X_test_sd.iloc[:, job_indices], 
-                                  feature_names=job_columns, 
-                                  show=False)
-                
-                # Afficher le graphique dans Streamlit
-                st.pyplot(fig)
-                plt.close()
-                st.write("Si le client est **édudiant**, **sans emploi**, **retraité** ou si son **job** est dans les **services**, alors les prédictions tendent assez clairement vers le **'YES'**.")     
-                st.write("__________________________________")
-
-                st.subheader("Client_Category")
-
-                feature_name = "Client_Category_M"
-                
-                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
-                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
-                fig = plt.gcf()          
-                st.pyplot(fig)       
-                plt.close() 
-                st.write("Si le **dernier contact avec le client** remonte à **moins de 6 mois**, les prédictions tendent majoritairement vers le **'YES'**.")          
-
-
-  
-if selected == "Recommandations & Perspectives":
-      st.subheader("Recommandations & Perspectives")
-      submenu_reco = st.radio("", ("PROFIL DES CLIENTS A CONTACTER", "NOMBRE ET DUREE D'APPEL", "RECAP"), horizontal=True)
-
-      if submenu_reco == "PROFIL DES CLIENTS A CONTACTER" :
-            submenu_profil = st.radio("", ("HOUSING", "ÂGE", "BALANCE", "PREVIOUS", "EDUCATION"), horizontal=True) 
-
-            if submenu_profil == "HOUSING" :
-                st.write("#### HOUSING:","Détention ou non d'un prêt immobilier")
-                st.write("##### Prioriser les clients qui n'ont pas de prêt immobilier")
-                st.write("Le modèle montre que les **clients ayant un prêt immobilier ont une probabilité plus faible de souscrire au DAT**.")
-                st.write("Une **analyse approfondie du contexte métier** est nécessaire pour **expliquer cette corrélation négative**. Deux hypothèses possibles :")
-                st.write(" - Les clients ayant un prêt immobilier pourraient **être perçus comme plus à risque de défaut de paiement en raison de leur dette existante**.")
-                st.write(" - Ces clients pourrait représenter des clients **ciblés pour une autre offre de prêt de la banque**. Dans ce cas, les clients ayant déjà un prêt seraient **moins susceptibles d'être sollicités pour un nouveau crédit**.")
-                
-
-            if submenu_profil == "ÂGE" :
-                st.write("#### ÂGE:")
-                st.write("##### Prioriser les clients âgés de 18 à 28 ans et de 59 ans ou plus ( Impact positif).")
-                st.write("Pour la **tranche d'âge intermédiaire (29-58 ans)**, le modèle **prédit majoritairement des résultats négatifs**. Étant donné que cette tranche constitue **la majorité des clients**, il est **essentiel de cibler en priorité** ceux qui : ")
-                st.write(" -  N'ont **pas de prêt immobilier**.")
-                st.write(" -  Ont une **balance supérieure à 300 €**, idéalement **au-delà de 800 €**.")
-            
-            if submenu_profil == "BALANCE" :
-                st.write("#### BALANCE:","Solde bancaire du client")
-                st.write("##### Contacter en priorité les clients dont la balance est supérieure à 800€.")
-                st.write("Pour les clients ayant une **balance entre 0 et 800 €**, le modèle divise cette population en **deux groupes de taille quasi identiques** : ceux qui souscrivent et ceux qui ne le font pas. Pour **choisir les clients à contacter en priorité**, il est recommandé de privilégier ceux qui : ")
-                st.write(" -  N'ont **pas de prêt immobilier**")
-                st.write(" -  Sont âgés de **moins de 29 ans ou de plus de 58 ans**")
-          
-            if submenu_profil == "PREVIOUS" :
-                st.write("#### PREVIOUS:","Nombre de contacts effectués avant la campagne avec le client")
-                st.write("##### Prioriser les clients déjà contactés")
-                st.write("L'objectif managérial serait de **renforcer les actions auprès des clients déjà engagés** tout en explorant des méthodes pour **réactiver ceux qui n'ont jamais été contactés.** ")
-                st.write("###### Les clients déjà contactés: ")
-                st.write(" -  Optimiser les campagnes de relance en **personnalisant les messages en fonction de leur historique**. Des relances ciblées, mettant en avant les avantages des DAT, peuvent accroître leur efficacité. ")
-                st.write(" -  Utiliser des **stratégies de segmentation avancées** : En les **classant selon l'intensité et le type de contact** (téléphone, e-mail, rencontre en agence), il est possible de **personnaliser davantage les offres** et d'augmenter les chances de conversion.")
-                st.write("###### Les clients jamais contactés (SHAP value négative): ")
-                st.write(" -  Il est conseillé **de lancer des actions spécifiques**, comme des campagnes de sensibilisation ou des offres personnalisées, pour susciter leur intérêt. **L'absence de contact préalable** n'indique pas forcément un désintérêt, mais peut **refléter un manque de communication à combler**.")
-                
-          
-            if submenu_profil == "EDUCATION" :
-                st.write("#### EDUCATION:","Niveau d'étude du client")
-                st.write("##### Prioriser les clients qui ont un niveau d'éducation tertiaire")
-                st.write("Le modèle indique que les clients ayant **un niveau d'éducation primaire ou secondaire sont moins susceptibles de souscrire au DAT**. Une analyse plus approfondie révèle que :")
-                st.write(" -  Les tranches d'âge **jeunes et intermédiaires** sont majoritairement associées à un niveau d'**éducation tertiaire**.")
-                st.write(" -  Les **métiers de management** se distinguent par **une forte proportion de personnes ayant un niveau d'éducation tertiaire**.")
-  
-
-      if submenu_reco == "NOMBRE ET DUREE D'APPEL" :
-            submenu_appel = st.radio("", ("DURATION", "CAMPAIGN"), horizontal=True) 
-
-            if submenu_appel == "DURATION" :
-                st.write("#### DURATION:","Durée du dernier contact en secondes")
-                st.write("Le temps consacré à chaque client s'avère être un facteur clé de succès dans le processus de conversion. **Les commerciaux devraient privilégier des interactions plus longues**, en particulier lors des premières prises de contact, et se concentrer sur **la qualité des échanges** pour mieux comprendre les besoins des clients. . ")
-                st.write("**Les résultats de nos analyses soulignent l'importance stratégique de la durée des interactions commerciales.** En optimisant le temps consacré à chaque client, la banque peut **significativement améliorer** ses taux de conversion et renforcer son efficacité commerciale.")
-                st.write("Pour **maximiser les chances de souscription** au produit bancaire DAT, voici les recommandations clés : ")
-                st.write(" -  **Encourager des échanges plus longs :** Former les équipes commerciales à adopter une approche engageante dès le premier contact, afin de mieux comprendre les attentes des clients et de leur proposer des solutions sur mesure. ")
-                st.write(" -  **Fixer un objectif minimal de 6 minutes par appel** pour les prospects à fort potentiel. Les analyses montrent en effet que **les interactions dépassant 360 secondes (6 minutes) ont un impact significatif**, les SHAP values traduisant une corrélation positive à partir de cette durée. ")
-          
-            if submenu_appel == "CAMPAIGN" :
-                st.write("#### CAMPAIGN:","nombre de contacts effectués avec le client pendant la campagne (dernier contact inclus)")
-                st.write("##### Il ne semble pas pertinent de contacter les clients plus d'une fois pendant la campagne. ")
-                st.write("Notre modèle montre qu'il ne semble pas payant de contacter les clients plus d'une fois pour leur proposer le produit. Il vaut mieux **capitaliser sur des clients pas encore contactés** pour leur proposer le produit plutôt que de contacter plusieurs fois le même client. ")
-
+if selected == 'Recommandations & Perspectives':
+    st.title("Recommandations & Perspectives")
+    st.write("""
+    ### Recommandations
+    - **Améliorer la collecte de données** : Ajouter plus de variables comportementales pour mieux cibler les clients.
+    - **Tester d'autres modèles** : Essayer des modèles avancés comme LightGBM ou CatBoost.
+    - **Déployer le modèle** : Intégrer le modèle dans un outil métier pour aider les conseillers.
+    - **Surveiller la dérive** : Mettre en place un suivi de la performance du modèle dans le temps.
     
-      if submenu_reco == "RECAP" :
-          st.write("Nous pouvons résumer les résultats de notre **Modèle pour prédire le succès d'une campagne Marketing pour une banque** dans les points suivants: ")
-          st.write("##### -  Prioriser les clients qui n'ont pas de prêt immobilier")
-          st.write("##### -  Prioriser les clients âgés de 18 à 28 ans et de 59 ans ou plus.")
-          st.write("##### -  Contacter en priorité les clients dont la balance est supérieure à 800€.")
-          st.write("##### -  Prioriser les clients déjà contactés")
-          st.write("##### -  Prioriser les clients qui ont un niveau d'éducation tertiaire")
-          st.write("##### -  Maintenir autant que possible une durée d'appel de minimum 6 minutes ")
-          st.write("##### -  Il ne semble pas pertinent de contacter les clients plus d'une fois pendant la campagne. ")
-          
+    ### Perspectives
+    - Étendre l'analyse à d'autres produits bancaires ou à d'autres canaux de communication.
+    - Utiliser des techniques d'explicabilité avancées pour mieux comprendre les décisions du modèle.
+    """)
 
-
-
-
-
-
-if selected == 'Outil  Prédictif':  
-
-    dff_TEST = df.copy()
-    dff_TEST = dff_TEST[dff_TEST['age'] < 75]
-    dff_TEST = dff_TEST.loc[dff_TEST["balance"] > -2257]
-    dff_TEST = dff_TEST.loc[dff_TEST["balance"] < 4087]
-    dff_TEST = dff_TEST.loc[dff_TEST["campaign"] < 6]
-    dff_TEST = dff_TEST.loc[dff_TEST["previous"] < 2.5]
-    dff_TEST = dff_TEST.drop('contact', axis = 1)
-
-    dff_TEST = dff_TEST.drop('pdays', axis = 1)
-
-    dff_TEST = dff_TEST.drop(['day'], axis=1)
-    dff_TEST = dff_TEST.drop(['duration'], axis=1)
-    dff_TEST = dff_TEST.drop(['job'], axis=1)
-    dff_TEST = dff_TEST.drop(['default'], axis=1)
-    dff_TEST = dff_TEST.drop(['month'], axis=1)
-    dff_TEST = dff_TEST.drop(['poutcome'], axis=1)
-    dff_TEST = dff_TEST.drop(['marital'], axis=1)
-    dff_TEST = dff_TEST.drop(['loan'], axis=1)
-    dff_TEST = dff_TEST.drop(['campaign'], axis=1)   
-     
-    dff_TEST['education'] = dff_TEST['education'].replace('unknown', np.nan)
-
-    X_dff_TEST = dff_TEST.drop('deposit', axis = 1)
-    y_dff_TEST = dff_TEST['deposit']
-    
-    dff_TEST = dff_TEST.drop(['deposit'], axis=1)   
-
-    # Séparation des données en un jeu d'entrainement et jeu de test
-    X_train_o, X_test_o, y_train_o, y_test_o = train_test_split(X_dff_TEST, y_dff_TEST, test_size = 0.20, random_state = 48)
-                    
-    # On fait de même pour les NaaN de 'education'
-    X_train_o['education'] = X_train_o['education'].fillna(method ='bfill')
-    X_train_o['education'] = X_train_o['education'].fillna(X_train_o['education'].mode()[0])
-
-    X_test_o['education'] = X_test_o['education'].fillna(method ='bfill')
-    X_test_o['education'] = X_test_o['education'].fillna(X_test_o['education'].mode()[0])
-                
-    # Standardisation des variables quantitatives:
-    scaler_o = StandardScaler()
-    cols_num_sd = ['age', 'balance', 'previous']
-    X_train_o[cols_num_sd] = scaler_o.fit_transform(X_train_o[cols_num_sd])
-    X_test_o[cols_num_sd] = scaler_o.transform (X_test_o[cols_num_sd])
-
-    # Encodage de la variable Cible 'deposit':
-    le_o = LabelEncoder()
-    y_train_o = le_o.fit_transform(y_train_o)
-    y_test_o = le_o.transform(y_test_o)
-
-    # Encodage des variables explicatives de type 'objet'
-    oneh_o = OneHotEncoder(drop = 'first', sparse_output = False)
-    cat1_o = ['housing']
-    X_train_o.loc[:, cat1_o] = oneh_o.fit_transform(X_train_o[cat1_o])
-    X_test_o.loc[:, cat1_o] = oneh_o.transform(X_test_o[cat1_o])
-
-    X_train_o[cat1_o] = X_train_o[cat1_o].astype('int64')
-    X_test_o[cat1_o] = X_test_o[cat1_o].astype('int64')
-
-    # 'education' est une variable catégorielle ordinale, remplacer les modalités de la variable par des nombres, en gardant l'ordre initial
-    X_train_o['education'] = X_train_o['education'].replace(['primary', 'secondary', 'tertiary'], [0, 1, 2])
-    X_test_o['education'] = X_test_o['education'].replace(['primary', 'secondary', 'tertiary'], [0, 1, 2])
-
-    dff_TEST_loan = df.copy()
-    dff_TEST_loan = dff_TEST_loan[dff_TEST_loan['age'] < 75]
-    dff_TEST_loan = dff_TEST_loan.loc[dff_TEST_loan["balance"] > -2257]
-    dff_TEST_loan = dff_TEST_loan.loc[dff_TEST_loan["balance"] < 4087]
-    dff_TEST_loan = dff_TEST_loan.loc[dff_TEST_loan["campaign"] < 6]
-    dff_TEST_loan = dff_TEST_loan.loc[dff_TEST_loan["previous"] < 2.5]
-    dff_TEST_loan = dff_TEST_loan.drop('contact', axis = 1)
-    
-    dff_TEST_loan = dff_TEST_loan.drop('pdays', axis = 1)
-    
-    dff_TEST_loan = dff_TEST_loan.drop(['day'], axis=1)
-    dff_TEST_loan = dff_TEST_loan.drop(['duration'], axis=1)
-    dff_TEST_loan = dff_TEST_loan.drop(['job'], axis=1)
-    dff_TEST_loan = dff_TEST_loan.drop(['default'], axis=1)
-    dff_TEST_loan = dff_TEST_loan.drop(['month'], axis=1)
-    dff_TEST_loan = dff_TEST_loan.drop(['poutcome'], axis=1)
-    dff_TEST_loan = dff_TEST_loan.drop(['marital'], axis=1)
-    dff_TEST_loan = dff_TEST_loan.drop(['campaign'], axis=1)   
-     
-    dff_TEST_loan['education'] = dff_TEST_loan['education'].replace('unknown', np.nan)
-    X_dff_TEST_loan = dff_TEST_loan.drop('deposit', axis = 1)
-    y_dff_TEST_loan = dff_TEST_loan['deposit']
-        
-    dff_TEST_loan = dff_TEST_loan.drop(['deposit'], axis=1)   
-    
-    # Séparation des données en un jeu d'entrainement et jeu de test
-    X_train_o_loan, X_test_o_loan, y_train_o_loan, y_test_o_loan = train_test_split(X_dff_TEST_loan, y_dff_TEST_loan, test_size = 0.20, random_state = 48)
-                        
-    # On fait de même pour les NaaN de 'education'
-    X_train_o_loan['education'] = X_train_o_loan['education'].fillna(method ='bfill')
-    X_train_o_loan['education'] = X_train_o_loan['education'].fillna(X_train_o_loan['education'].mode()[0])
-    
-    X_test_o_loan['education'] = X_test_o_loan['education'].fillna(method ='bfill')
-    X_test_o_loan['education'] = X_test_o_loan['education'].fillna(X_test_o_loan['education'].mode()[0])
-                    
-    # Standardisation des variables quantitatives:
-    scaler_o = StandardScaler()
-    cols_num_sd = ['age', 'balance', 'previous']
-    X_train_o_loan[cols_num_sd] = scaler_o.fit_transform(X_train_o_loan[cols_num_sd])
-    X_test_o_loan[cols_num_sd] = scaler_o.transform (X_test_o_loan[cols_num_sd])
-    
-    # Encodage de la variable Cible 'deposit':
-    le_o = LabelEncoder()
-    y_train_o_loan = le_o.fit_transform(y_train_o_loan)
-    y_test_o_loan = le_o.transform(y_test_o_loan)
-    
-    # Encodage des variables explicatives de type 'objet'
-    oneh_o = OneHotEncoder(drop = 'first', sparse_output = False)
-    cat1_o = ['housing', 'loan']
-    X_train_o_loan.loc[:, cat1_o] = oneh_o.fit_transform(X_train_o_loan[cat1_o])
-    X_test_o_loan.loc[:, cat1_o] = oneh_o.transform(X_test_o_loan[cat1_o])
-    
-    X_train_o_loan[cat1_o] = X_train_o_loan[cat1_o].astype('int64')
-    X_test_o_loan[cat1_o] = X_test_o_loan[cat1_o].astype('int64')
-        
-    # 'education' est une variable catégorielle ordinale, remplacer les modalités de la variable par des nombres, en gardant l'ordre initial
-    X_train_o_loan['education'] = X_train_o_loan['education'].replace(['primary', 'secondary', 'tertiary'], [0, 1, 2])
-    X_test_o_loan['education'] = X_test_o_loan['education'].replace(['primary', 'secondary', 'tertiary'], [0, 1, 2])
-
-    #DATAFRAME POUR PRED AVEC MARITAL
-    dff_TEST_marital = df.copy()
-    dff_TEST_marital = dff_TEST_marital[dff_TEST_marital['age'] < 75]
-    dff_TEST_marital = dff_TEST_marital.loc[dff_TEST_marital["balance"] > -2257]
-    dff_TEST_marital = dff_TEST_marital.loc[dff_TEST_marital["balance"] < 4087]
-    dff_TEST_marital = dff_TEST_marital.loc[dff_TEST_marital["campaign"] < 6]
-    dff_TEST_marital = dff_TEST_marital.loc[dff_TEST_marital["previous"] < 2.5]
-    dff_TEST_marital = dff_TEST_marital.drop('contact', axis = 1)
-    
-    dff_TEST_marital = dff_TEST_marital.drop('pdays', axis = 1)
-    
-    dff_TEST_marital = dff_TEST_marital.drop(['day'], axis=1)
-    dff_TEST_marital = dff_TEST_marital.drop(['duration'], axis=1)
-    dff_TEST_marital = dff_TEST_marital.drop(['job'], axis=1)
-    dff_TEST_marital = dff_TEST_marital.drop(['default'], axis=1)
-    dff_TEST_marital = dff_TEST_marital.drop(['month'], axis=1)
-    dff_TEST_marital = dff_TEST_marital.drop(['loan'], axis=1)
-    dff_TEST_marital = dff_TEST_marital.drop(['poutcome'], axis=1)
-    dff_TEST_marital = dff_TEST_marital.drop(['campaign'], axis=1)   
-     
-    dff_TEST_marital['education'] = dff_TEST_marital['education'].replace('unknown', np.nan)
-    X_dff_TEST_marital = dff_TEST_marital.drop('deposit', axis = 1)
-    y_dff_TEST_marital = dff_TEST_marital['deposit']
-        
-    dff_TEST_marital = dff_TEST_marital.drop(['deposit'], axis=1) 
-
-    dummies = pd.get_dummies(dff_TEST_marital['marital'], prefix='marital').astype(int)
-    dff_TEST_marital = pd.concat([dff_TEST_marital.drop('marital', axis=1), dummies], axis=1)
-    
-
-
-    #DATAFRAME POUR PRED AVEC POUTCOME
-    dff_TEST_poutcome = df.copy()
-    dff_TEST_poutcome = dff_TEST_poutcome[dff_TEST_poutcome['age'] < 75]
-    dff_TEST_poutcome = dff_TEST_poutcome.loc[dff_TEST_poutcome["balance"] > -2257]
-    dff_TEST_poutcome = dff_TEST_poutcome.loc[dff_TEST_poutcome["balance"] < 4087]
-    dff_TEST_poutcome = dff_TEST_poutcome.loc[dff_TEST_poutcome["campaign"] < 6]
-    dff_TEST_poutcome = dff_TEST_poutcome.loc[dff_TEST_poutcome["previous"] < 2.5]
-    dff_TEST_poutcome = dff_TEST_poutcome.drop('contact', axis = 1)
-    
-    dff_TEST_poutcome = dff_TEST_poutcome.drop('pdays', axis = 1)
-    
-    dff_TEST_poutcome = dff_TEST_poutcome.drop(['day'], axis=1)
-    dff_TEST_poutcome = dff_TEST_poutcome.drop(['duration'], axis=1)
-    dff_TEST_poutcome = dff_TEST_poutcome.drop(['job'], axis=1)
-    dff_TEST_poutcome = dff_TEST_poutcome.drop(['default'], axis=1)
-    dff_TEST_poutcome = dff_TEST_poutcome.drop(['month'], axis=1)
-    dff_TEST_poutcome = dff_TEST_poutcome.drop(['loan'], axis=1)
-    dff_TEST_poutcome = dff_TEST_poutcome.drop(['marital'], axis=1)
-    dff_TEST_poutcome = dff_TEST_poutcome.drop(['campaign'], axis=1)   
-     
-    dff_TEST_poutcome['education'] = dff_TEST_poutcome['education'].replace('unknown', np.nan)
-    dff_TEST_poutcome['poutcome'] = dff_TEST_poutcome['poutcome'].replace('unknown', np.nan)
-    
-    X_dff_TEST_poutcome = dff_TEST_poutcome.drop('deposit', axis = 1)
-    y_dff_TEST_poutcome = dff_TEST_poutcome['deposit']
-        
-    dff_TEST_poutcome = dff_TEST_poutcome.drop(['deposit'], axis=1)
-
-    dff_TEST_poutcome['poutcome'] = dff_TEST_poutcome['poutcome'].fillna(method ='bfill')
-    dff_TEST_poutcome['poutcome'] = dff_TEST_poutcome['poutcome'].fillna(dff_TEST_poutcome['poutcome'].mode()[0])    
-
-    dummies = pd.get_dummies(dff_TEST_poutcome['poutcome'], prefix='poutcome').astype(int)
-    dff_TEST_poutcome = pd.concat([dff_TEST_poutcome.drop('poutcome', axis=1), dummies], axis=1)
-
-    #DATAFRAME POUR PRED JOB
-    dff_TEST_job = df.copy()
-    dff_TEST_job = dff_TEST_job[dff_TEST_job['age'] < 75]
-    dff_TEST_job = dff_TEST_job.loc[dff_TEST_job["balance"] > -2257]
-    dff_TEST_job = dff_TEST_job.loc[dff_TEST_job["balance"] < 4087]
-    dff_TEST_job = dff_TEST_job.loc[dff_TEST_job["campaign"] < 6]
-    dff_TEST_job = dff_TEST_job.loc[dff_TEST_job["previous"] < 2.5]
-    dff_TEST_job = dff_TEST_job.drop('contact', axis = 1)
-    
-    dff_TEST_job = dff_TEST_job.drop('pdays', axis = 1)
-    
-    dff_TEST_job = dff_TEST_job.drop(['day'], axis=1)
-    dff_TEST_job = dff_TEST_job.drop(['duration'], axis=1)
-    dff_TEST_job = dff_TEST_job.drop(['poutcome'], axis=1)
-    dff_TEST_job = dff_TEST_job.drop(['default'], axis=1)
-    dff_TEST_job = dff_TEST_job.drop(['month'], axis=1)
-    dff_TEST_job = dff_TEST_job.drop(['loan'], axis=1)
-    dff_TEST_job = dff_TEST_job.drop(['marital'], axis=1)
-    dff_TEST_job = dff_TEST_job.drop(['campaign'], axis=1)   
-     
-    dff_TEST_job['education'] = dff_TEST_job['education'].replace('unknown', np.nan)
-    dff_TEST_job['job'] = dff_TEST_job['job'].replace('unknown', np.nan)
-
-
-    imputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
-    dff_TEST_job.loc[:,['job']] = imputer.fit_transform(dff_TEST_job[['job']])
-    dff_TEST_job.loc[:,['job']] = imputer.transform(dff_TEST_job[['job']])
-
-    dummies = pd.get_dummies(dff_TEST_job['job'], prefix='job').astype(int)
-    dff_TEST_job = pd.concat([dff_TEST_job.drop('job', axis=1), dummies], axis=1)
-    
-    dff_TEST_job = dff_TEST_job.drop(['deposit'], axis=1)  
-
-    #DATAFRAME POUR PRED CLIENT CATEGORY
-    dff_TEST_client_category = df.copy()
-    dff_TEST_client_category = dff_TEST_client_category[dff_TEST_client_category['age'] < 75]
-    dff_TEST_client_category = dff_TEST_client_category.loc[dff_TEST_client_category["balance"] > -2257]
-    dff_TEST_client_category = dff_TEST_client_category.loc[dff_TEST_client_category["balance"] < 4087]
-    dff_TEST_client_category = dff_TEST_client_category.loc[dff_TEST_client_category["campaign"] < 6]
-    dff_TEST_client_category = dff_TEST_client_category.loc[dff_TEST_client_category["previous"] < 2.5]
-    dff_TEST_client_category = dff_TEST_client_category.drop('contact', axis = 1)
-    
-    
-    dff_TEST_client_category = dff_TEST_client_category.drop(['day'], axis=1)
-    dff_TEST_client_category = dff_TEST_client_category.drop(['duration'], axis=1)
-    dff_TEST_client_category = dff_TEST_client_category.drop(['poutcome'], axis=1)
-    dff_TEST_client_category = dff_TEST_client_category.drop(['default'], axis=1)
-    dff_TEST_client_category = dff_TEST_client_category.drop(['month'], axis=1)
-    dff_TEST_client_category = dff_TEST_client_category.drop(['loan'], axis=1)
-    dff_TEST_client_category = dff_TEST_client_category.drop(['marital'], axis=1)
-    dff_TEST_client_category = dff_TEST_client_category.drop(['campaign'], axis=1)   
-    dff_TEST_client_category = dff_TEST_client_category.drop(['job'], axis=1)   
-    
-    # Les catégories de clients selon qu'ils soient contactés pour la première fois, il y a moins de 6 mois, ou plus de 6 mois:
-    bins = [-2, -1, 180, 855]
-    labels = ['Prospect', 'Reached-6M', 'Reached+6M']
-    dff_TEST_client_category['Client_Category_M'] = pd.cut(dff_TEST_client_category['pdays'], bins=bins, labels=labels)
-    
-    # Transformation de 'Client_Category' en type 'objet'
-    dff_TEST_client_category['Client_Category_M'] = dff_TEST_client_category['Client_Category_M'].astype('object')
-    
-    # Suppression de pdays
-    dff_TEST_client_category = dff_TEST_client_category.drop('pdays', axis =1)
-    
-    dff_TEST_client_category['education'] = dff_TEST_client_category['education'].replace('unknown', np.nan)
-    
-    # 'Client_Category_M' est une variable catégorielle ordinale, remplacer les modalités de la variable par des nombres, en gardant l'ordre initial
-    dff_TEST_client_category['Client_Category_M'] = dff_TEST_client_category['Client_Category_M'].replace(['Prospect', 'Reached-6M', 'Reached+6M'], [0, 1, 2])
-
-
-    st.title("Démonstration et application de notre modèle à votre cas")               
-
-    st.subheader('Informations sur le client')
-    # Collecte de l'âge sans valeur par défaut
-    age_input = st.text_input("Quel est l'âge du client ?")  
-    age = None
-    if age_input:  # Vérifie si age_input n'est pas vide
-        try:
-            # Convertir l'entrée en entier
-            age = int(age_input)
-        
-        # Vérifier si l'âge est dans la plage valide
-            if age < 18 or age > 95:
-                st.error("L'âge doit être compris entre 18 et 95 ans.")
-
-        except ValueError:
-            st.error("Veuillez entrer un nombre valide pour l'âge.")
-    else:
-    # Quand le champ est vide, on ne fait rien
-        pass  # Vous pouvez aussi utiliser `st.write("")` pour rien afficher.
-    
-    education = st.selectbox("Quel est son niveau d'étude ?", ("tertiary", "secondary", "unknown", "primary"))
-         
-    # Collecte du solde bancaire avec vérification
-    balance_input = st.text_input("Quel est le solde de son compte en banque ?")  # Pas de valeur par défaut
-    
-    # Validation de l'entrée pour le solde
-    balance = None
-    if balance_input:  # Vérifie si balance_input n'est pas vide
-        try:
-            # Convertir l'entrée en int pour gérer le solde comme un entier
-            balance = int(balance_input)
-        except ValueError:
-            st.error("Veuillez entrer un nombre entier valide pour le solde.")
-    else : 
-        pass
-    
-    housing = st.selectbox("As-t-il un crédit immobilier ?", ('yes', 'no'))
-
-    previous = st.selectbox("Avant cette campagne marketing, combien de fois le client a-t-il été contacté ?", 
-                             options=["0 fois", "1 fois", "2 fois ou plus"])    
-
-
-    # Vérifiez si age et balance sont correctement remplis
-    if age is not None and balance is not None:
-        # Affichage du récapitulatif
-        st.write(f'### Récapitulatif')
-        st.markdown(f"Le client a **{age} ans**")
-        st.markdown(f"Le client a un niveau d'étude **{education}**")
-        st.markdown(f"Le solde de son compte en banque est de **{balance} euros**")
-        st.markdown(f"Le client a-t-il un crédit immobilier : **{housing}**")
-        st.markdown(f"Le client a été contacté **{previous}** avant cette campagne marketing")
-
-        # Mapper les options à des valeurs entières
-        if previous == "0 fois":
-            previous = 0
-        elif previous == "1 fois":
-            previous = 1
-        elif previous == "2 fois ou plus" :
-            previous = 2
-        
-        # Créer un dataframe récapitulatif des données du prospect
-        infos_prospect = pd.DataFrame({
-            'age': [age], 
-            'education': [education], 
-            'balance': [balance], 
-            'housing': [housing], 
-            'previous': [previous],
-        }, index=[0]) 
-    
-        # Affichage pour vérifier le nouvel index
-        #st.subheader("Voici le tableau avec vos informations")
-        #st.dataframe(infos_prospect)
-    
-        # Construction du DataFrame pour le prospect à partir de infos_prospect
-        pred_df = infos_prospect.copy()
-    
-        # Remplacer 'unknown' par NaN uniquement pour les colonnes spécifiques
-        cols_to_check = ['education']  # Colonnes à vérifier
-        for col in cols_to_check:
-            if (pred_df[col] == 'unknown').any():  # Vérifie si la valeur est "unknown"
-                pred_df[col] = np.nan  # Remplace "unknown" par NaN
-    
-        # Remplissage par le mode pour 'education' et 'poutcome' dans le cas où il y a des NaN
-        if pred_df['education'].isna().any():
-            # Utiliser le mode de 'education' dans dff
-            pred_df['education'] = dff_TEST['education'].mode()[0]
-    
-        # Transformation de 'education' et 'Client_Category_M' pour respecter l'ordre ordinal
-        pred_df['education'] = pred_df['education'].replace(['primary', 'secondary', 'tertiary'], [0, 1, 2])
-        
-    
-        # Remplacer 'yes' par 1 et 'no' par 0 pour chaque colonne
-        cols_to_replace = ['housing']
-        for col in cols_to_replace:
-            pred_df[col] = pred_df[col].replace({'yes': 1, 'no': 0})
-    
-    
-        # Réorganiser les colonnes pour correspondre exactement à celles de dff
-        pred_df = pred_df.reindex(columns=dff_TEST.columns, fill_value=0)
-        
-        # Affichage du DataFrame transformé avant la standardisation
-        #st.write("Affichage du dataframe transformé (avant standardisation):")
-        #st.dataframe(pred_df)
-        
-
-        # Liste des colonnes numériques à standardiser
-        num_cols = ['age', 'balance','previous']
-    
-        # Étape 1 : Créer un index spécifique pour pred_df
-        # Utiliser un index unique pour pred_df, en le commençant après la dernière ligne de dff
-        pred_df.index = range(dff_TEST.shape[0], dff_TEST.shape[0] + len(pred_df))
-    
-        # Étape 2 : Concaténer dff et pred_df
-        # Concaténer les deux DataFrames dff et pred_df sur les colonnes numériques
-        combined_df = pd.concat([dff_TEST[num_cols], pred_df[num_cols]], axis=0)
-    
-        # Étape 3 : Standardisation des données numériques
-        scaler = StandardScaler()
-        combined_df[num_cols] = scaler.fit_transform(combined_df[num_cols])
-    
-        # Étape 4 : Séparer à nouveau pred_df des autres données
-        # On récupère uniquement les lignes correspondant à pred_df en utilisant l'index spécifique
-        pred_df[num_cols] = combined_df.loc[pred_df.index, num_cols]
-    
-        # Réinitialiser l'index de pred_df après la manipulation (facultatif)
-        pred_df = pred_df.reset_index(drop=True)
-        #st.write("Dataframe du client en question")
-        #st.dataframe(pred_df)
-        
-        # Interface utilisateur
-        filename = "XGBOOST_1_SD_model_PRED_AVEC_parametres.pkl"
-        model_XGBOOST_1_SD_model_PRED_AVEC_parametres = joblib.load(filename)
-        explainer = shap.TreeExplainer(model_XGBOOST_1_SD_model_PRED_AVEC_parametres)
-        shap_values_pred = explainer.shap_values(pred_df)
-        shap_values_pred_rounded = np.round(shap_values_pred, 2)
-       
-
-        # Prédiction
-        prediction = model_XGBOOST_1_SD_model_PRED_AVEC_parametres.predict(pred_df)
-        prediction_proba = model_XGBOOST_1_SD_model_PRED_AVEC_parametres.predict_proba(pred_df)
-        max_proba = np.max(prediction_proba[0]) * 100
-    
-        st.write("__________________________________________________")
-        # Affichage des résultats
-        st.subheader(f"Prediction : {prediction[0]}")
-        st.markdown(f"**Niveau de confiance: {max_proba:.2f}%**")
-
-        st.write("Force plot du client :")
-        # Générer un graphique de force SHAP avec matplotlib
-        shap.initjs() 
-        shap.force_plot(explainer.expected_value, shap_values_pred_rounded, pred_df, matplotlib=True)
-        fig = plt.gcf()
-        st.pyplot(fig)
-        plt.close()
-
-            
-        if prediction[0] == 0:
-            st.write("Conclusion : **Ce client N'EST PAS susceptible de souscrire à un dépôt à terme.**")
-        else:
-            st.write("Conclusion : **Ce client EST susceptible de souscrire à un dépôt à terme.**")
-            st.write("\nNos recommandations : ")
-            st.write("- **Durée d'appel** : pour maximiser les chances de souscription au produit, veiller à rester le plus longtemps possible au téléphone avec ce client (idéalement au moins 6 minutes).")
-            st.write("- **Nombre de contacts avec le client pendant la campagne** : il serait contre-productif de le contacter plus d'une fois.")
-    
-            st.write("__________________________________________________")
-            st.write("__________________________________________________")
-
-    
-            st.markdown("**Si vous le souhaitez, vous pouvez affiner la prédiction en ajoutant une autre information concernant votre client.**")
-            
-            # Afficher le sélecteur d'option pour le raffinement, incluant l'option pour ne rien ajouter
-            option_to_add = st.radio("Choisir une information à ajouter :", 
-                                           ["None", "loan", "marital", "poutcome", "job", "Dernier_contact"], horizontal=True)
-            
-            if option_to_add != "None":
-                # Ajout de la logique pour chaque option sélectionnée
-                if option_to_add == "loan":
-                    loan = st.selectbox("A-t-il un crédit personnel ?", ('yes', 'no'))
-                    pred_df['loan'] = loan
-                    # Remplacer 'yes' par 1 et 'no' par 0 pour chaque colonne
-                    cols_to_replace = ['loan']
-                    for col in cols_to_replace:
-                        pred_df[col] = pred_df[col].replace({'yes': 1, 'no': 0})
-                    # Réorganiser les colonnes pour correspondre exactement à celles de dff
-                    pred_df = pred_df.reindex(columns=dff_TEST_loan.columns, fill_value=0)
-                     # Utiliser un index unique pour pred_df, en le commençant après la dernière ligne de dff
-                    pred_df.index = range(dff_TEST_loan.shape[0], dff_TEST_loan.shape[0] + len(pred_df))
-                
-                    # Étape 2 : Concaténer dff et pred_df
-                    # Concaténer les deux DataFrames dff et pred_df sur les colonnes numériques
-                    num_cols = ['age', 'balance','previous']
-                    combined_df_loan = pd.concat([dff_TEST_loan[num_cols], pred_df[num_cols]], axis=0)
-    
-                    # Étape 4 : Séparer à nouveau pred_df des autres données
-                    # On récupère uniquement les lignes correspondant à pred_df en utilisant l'index spécifique
-                    pred_df[num_cols] = combined_df_loan.loc[pred_df.index, num_cols]
-                
-                    # Réinitialiser l'index de pred_df après la manipulation (facultatif)
-                    pred_df = pred_df.reset_index(drop=True)
-                    #st.write("Dataframe du client en question")
-                    #st.dataframe(pred_df)
-    
-                    # Conditions pour charger le modèle approprié
-                    filename_LOAN = "XGBOOST_1_SD_model_PRED_loan_XGBOOST_1.pkl"
-                    additional_model = joblib.load(filename_LOAN)
-                    explainer = shap.TreeExplainer(additional_model)
-                    shap_values_loan = explainer.shap_values(pred_df)
-                    shap_values_loan_rounded = np.round(shap_values_loan, 2)
-
-       
-                    # Prédiction avec le DataFrame optimisé
-                    prediction_opt_loan = additional_model.predict(pred_df)
-                    prediction_proba_opt_loan = additional_model.predict_proba(pred_df)
-                    max_proba_opt_loan = np.max(prediction_proba_opt_loan[0]) * 100
-                   
-                    # Affichage des résultats
-                    st.markdown(f"Prediction après affinage : **{prediction_opt_loan[0]}**")
-                    if max_proba_opt_loan > max_proba:
-                        variation = "en hausse"
-                    elif max_proba_opt_loan == max_proba:
-                        variation = "inchangé"
-                    else:
-                        variation = "en baisse"
-                    
-                    # Affiche le niveau de confiance après affinage avec la variation
-                    st.markdown(f"Niveau de confiance après affinage : **{max_proba_opt_loan:.2f}%** (**{variation}** avec cette nouvelle information sur le client)")
-
-
-                                     
-                    st.write("Force plot du client :")
-                    shap.initjs() 
-                    shap.force_plot(explainer.expected_value, shap_values_loan_rounded, pred_df, matplotlib=True)
-                    fig = plt.gcf()
-                    st.pyplot(fig)
-                    plt.close()
-                 
-                    if prediction_opt_loan[0] == 0:
-                        st.write("Conclusion : **Ce client N'EST PAS susceptible de souscrire à un dépôt à terme.**")
-                    else:
-                        st.write("Conclusion : **Ce client EST susceptible de souscrire à un dépôt à terme.**")
-                
-        
-                elif option_to_add == "marital":
-                    marital = st.selectbox("Quelle est la situation maritale du client ?", ("married", "single", "divorced"))
-                    pred_df['marital'] = marital
-                    #st.write("Situation maritale : ", marital)
-                    
-                    # Liste des variables catégorielles multi-modales à traiter
-                    cat_cols_multi_modal = ['marital']
-                    # Parcourir chaque variable catégorielle multi-modale pour gérer les colonnes manquantes
-                    for col in cat_cols_multi_modal:
-                        # Effectuer un encodage des variables catégorielles multi-modales
-                        dummies = pd.get_dummies(pred_df[col], prefix=col).astype(int)
-                        pred_df = pd.concat([pred_df.drop(col, axis=1), dummies], axis=1)
-                                
-                    # Réorganiser les colonnes pour correspondre exactement à celles de dff
-                    pred_df = pred_df.reindex(columns=dff_TEST_marital.columns, fill_value=0)
-                    
-                    # Étape 2 : Concaténer dff et pred_df
-                    # Concaténer les deux DataFrames dff et pred_df sur les colonnes numériques
-                    num_cols = ['age', 'balance','previous']
-                    
-                    # Utiliser un index unique pour pred_df, en le commençant après la dernière ligne de dff
-                    pred_df.index = range(dff_TEST_marital.shape[0], dff_TEST_marital.shape[0] + len(pred_df))
-                
-                    combined_df_marital = pd.concat([dff_TEST_marital[num_cols], pred_df[num_cols]], axis=0)
-        
-                    # Étape 3 : Standardisation des données numériques
-                    scaler = StandardScaler()
-                    combined_df_marital[num_cols] = scaler.fit_transform(combined_df_marital[num_cols])
-        
-                    # Étape 4 : Séparer à nouveau pred_df des autres données
-                    # On récupère uniquement les lignes correspondant à pred_df en utilisant l'index spécifique
-                    pred_df[num_cols] = combined_df_marital.loc[pred_df.index, num_cols]
-                
-                    # Réinitialiser l'index de pred_df après la manipulation (facultatif)
-                    pred_df = pred_df.reset_index(drop=True)
-                    #st.write("Dataframe du client en question")
-                    #st.dataframe(pred_df)
-                    # Conditions pour charger le modèle approprié
-                    filename_marital = "XGBOOST_1_SD_model_PRED_marital_XGBOOST_1.pkl"
-                    additional_model = joblib.load(filename_marital)
-                    explainer = shap.TreeExplainer(additional_model)
-                    shap_values_marital = explainer.shap_values(pred_df)
-                    shap_values_marital_rounded = np.round(shap_values_marital, 2)
-                
-                    # Prédiction avec le DataFrame optimisé
-                    prediction_opt_marital = additional_model.predict(pred_df)
-                    prediction_proba_opt_marital = additional_model.predict_proba(pred_df)
-                    max_proba_opt_marital = np.max(prediction_proba_opt_marital[0]) * 100
-
-                 
-                    # Affichage des résultats
-                    st.markdown(f"Prediction après affinage : **{prediction_opt_marital[0]}**")
-                    if max_proba_opt_marital > max_proba:
-                        variation = "en hausse"
-                    elif max_proba_opt_marital == max_proba:
-                        variation = "inchangé"
-                    else:
-                        variation = "en baisse"
-                    
-                    # Affiche le niveau de confiance après affinage avec la variation
-                    st.markdown(f"Niveau de confiance après affinage : **{max_proba_opt_marital:.2f}%** (**{variation}** avec cette nouvelle information sur le client)")
-                 
-                    st.write("Force plot du client :")
-                    shap.initjs() 
-                    shap.force_plot(explainer.expected_value, shap_values_marital_rounded, pred_df, matplotlib=True)
-                    fig = plt.gcf()
-                    st.pyplot(fig)
-                    plt.close()
-                 
-                    if prediction_opt_marital[0] == 0:
-                        st.write("Conclusion : **Ce client N'EST PAS susceptible de souscrire à un dépôt à terme.**")
-                    else:
-                        st.write("Conclusion : **Ce client EST susceptible de souscrire à un dépôt à terme.**")
-                
-        
-                elif option_to_add == "poutcome":
-                    poutcome = st.selectbox("Quel a été le résultat de la précédente campagne avec le client ?", ('success', 'failure', 'other'))
-                    pred_df['poutcome'] = poutcome
-                    #st.write("Résultat de la campagne : ", poutcome)
-                    
-                   
-                    # Liste des variables catégorielles multi-modales à traiter
-                    cat_cols_multi_modal_poutcome = ['poutcome']
-                    # Parcourir chaque variable catégorielle multi-modale pour gérer les colonnes manquantes
-                    for col in cat_cols_multi_modal_poutcome:
-                        # Effectuer un encodage des variables catégorielles multi-modales
-                        dummies = pd.get_dummies(pred_df[col], prefix=col).astype(int)
-                        pred_df = pd.concat([pred_df.drop(col, axis=1), dummies], axis=1)
-                                
-                    # Réorganiser les colonnes pour correspondre exactement à celles de dff
-                    pred_df = pred_df.reindex(columns=dff_TEST_poutcome.columns, fill_value=0)
-                    
-                    # Étape 2 : Concaténer dff et pred_df
-                    # Concaténer les deux DataFrames dff et pred_df sur les colonnes numériques
-                    num_cols = ['age', 'balance','previous']
-                    
-                    # Utiliser un index unique pour pred_df, en le commençant après la dernière ligne de dff
-                    pred_df.index = range(dff_TEST_poutcome.shape[0], dff_TEST_poutcome.shape[0] + len(pred_df))
-                
-                    combined_df_poutcome = pd.concat([dff_TEST_poutcome[num_cols], pred_df[num_cols]], axis=0)
-        
-                    # Étape 3 : Standardisation des données numériques
-                    scaler = StandardScaler()
-                    combined_df_poutcome[num_cols] = scaler.fit_transform(combined_df_poutcome[num_cols])
-        
-                    # Étape 4 : Séparer à nouveau pred_df des autres données
-                    # On récupère uniquement les lignes correspondant à pred_df en utilisant l'index spécifique
-                    pred_df[num_cols] = combined_df_poutcome.loc[pred_df.index, num_cols]
-                
-                    # Réinitialiser l'index de pred_df après la manipulation (facultatif)
-                    pred_df = pred_df.reset_index(drop=True)
-              
-                     # Conditions pour charger le modèle approprié
-                    filename_poutcome = "XGBOOST_1_SD_model_PRED_poutcome_XGBOOST_quater.pkl"
-                    additional_model = joblib.load(filename_poutcome)
-                    explainer = shap.TreeExplainer(additional_model)
-                    shap_values_poutcome = explainer.shap_values(pred_df)
-                    shap_values_poutcome_rounded = np.round(shap_values_poutcome, 2)
-                
-                    # Prédiction avec le DataFrame optimisé
-                    prediction_opt_poutcome = additional_model.predict(pred_df)
-                    prediction_proba_opt_poutcome = additional_model.predict_proba(pred_df)
-                    max_proba_opt_poutcome = np.max(prediction_proba_opt_poutcome[0]) * 100
-
-                    
-                    # Affichage des résultats
-                    st.markdown(f"Prediction après affinage : **{prediction_opt_poutcome[0]}**")
-                    if max_proba_opt_poutcome > max_proba:
-                        variation = "en hausse"
-                    elif max_proba_opt_poutcome == max_proba:
-                        variation = "inchangé"
-                    else:
-                        variation = "en baisse"
-                    
-                    # Affiche le niveau de confiance après affinage avec la variation
-                    st.markdown(f"Niveau de confiance après affinage : **{max_proba_opt_poutcome:.2f}%** (**{variation}** avec cette nouvelle information sur le client)")
-
-                    #st.write("Dataframe du client en question")
-                    #st.dataframe(pred_df)
-                 
-                    st.write("Force plot du client :")
-                    shap.initjs() 
-                    shap.force_plot(explainer.expected_value, shap_values_poutcome_rounded, pred_df, matplotlib=True)
-                    fig = plt.gcf()
-                    st.pyplot(fig)
-                    plt.close()
-                 
-                    if prediction_opt_poutcome[0] == 0:
-                        st.write("Conclusion : **Ce client N'EST PAS susceptible de souscrire à un dépôt à terme.**")
-                    else:
-                        st.write("Conclusion : **Ce client EST susceptible de souscrire à un dépôt à terme.**")
-                
-        
-        
-                elif option_to_add == "job":
-                    job = st.selectbox("Quel est l'emploi du client ?", ('admin.', 'blue-collar', 'entrepreneur',
-                                                                         'housemaid', 'management', 'retired', 
-                                                                         'self-employed', 'services', 'student', 
-                                                                         'technician', 'unemployed'))
-                    pred_df['job'] = job
-                    #st.write("Emploi : ", job)
-                 
-                    # Liste des variables catégorielles multi-modales à traiter
-                    cat_cols_multi_modal_job = ['job']
-                    # Parcourir chaque variable catégorielle multi-modale pour gérer les colonnes manquantes
-                    for col in cat_cols_multi_modal_job:
-                        # Effectuer un encodage des variables catégorielles multi-modales
-                        dummies = pd.get_dummies(pred_df[col], prefix=col).astype(int)
-                        pred_df = pd.concat([pred_df.drop(col, axis=1), dummies], axis=1)
-                                
-                    # Réorganiser les colonnes pour correspondre exactement à celles de dff
-                    pred_df = pred_df.reindex(columns=dff_TEST_job.columns, fill_value=0)
-                    
-                    # Étape 2 : Concaténer dff et pred_df
-                    # Concaténer les deux DataFrames dff et pred_df sur les colonnes numériques
-                    num_cols = ['age', 'balance','previous']
-                    
-                    # Utiliser un index unique pour pred_df, en le commençant après la dernière ligne de dff
-                    pred_df.index = range(dff_TEST_job.shape[0], dff_TEST_job.shape[0] + len(pred_df))
-                
-                    combined_df_job = pd.concat([dff_TEST_job[num_cols], pred_df[num_cols]], axis=0)
-        
-                    # Étape 3 : Standardisation des données numériques
-                    scaler = StandardScaler()
-                    combined_df_job[num_cols] = scaler.fit_transform(combined_df_job[num_cols])
-        
-                    # Étape 4 : Séparer à nouveau pred_df des autres données
-                    # On récupère uniquement les lignes correspondant à pred_df en utilisant l'index spécifique
-                    pred_df[num_cols] = combined_df_job.loc[pred_df.index, num_cols]
-                
-                    # Réinitialiser l'index de pred_df après la manipulation (facultatif)
-                    pred_df = pred_df.reset_index(drop=True)
-              
-                     # Conditions pour charger le modèle approprié
-                    filename_job = "XGBOOST_1_SD_model_PRED_job_XGBOOST_1.pkl"
-                    additional_model = joblib.load(filename_job)
-                    explainer = shap.TreeExplainer(additional_model)
-                    shap_values_job = explainer.shap_values(pred_df)
-                    shap_values_job_rounded = np.round(shap_values_job, 2)
-                 
-                    #st.write("Dataframe du client en question")
-                    #st.dataframe(pred_df)
-                
-                    # Prédiction avec le DataFrame optimisé
-                    prediction_opt_job = additional_model.predict(pred_df)
-                    prediction_proba_opt_job = additional_model.predict_proba(pred_df)
-                    max_proba_opt_job = np.max(prediction_proba_opt_job[0]) * 100
-                
-                    # Affichage des résultats
-                    st.markdown(f"Prediction après affinage : **{prediction_opt_job[0]}**")
-                    if max_proba_opt_job > max_proba:
-                        variation = "en hausse"
-                    elif max_proba_opt_job == max_proba:
-                        variation = "inchangé"
-                    else:
-                        variation = "en baisse"
-                    
-                    # Affiche le niveau de confiance après affinage avec la variation
-                    st.markdown(f"Niveau de confiance après affinage : **{max_proba_opt_job:.2f}%** (**{variation}** avec cette nouvelle information sur le client)")
-
-                    st.write("Force plot du client :")
-                    shap.initjs() 
-                    shap.force_plot(explainer.expected_value, shap_values_job_rounded, pred_df, matplotlib=True)
-                    fig = plt.gcf()
-                    st.pyplot(fig)
-                    plt.close()
-                 
-                    if prediction_opt_job[0] == 0:
-                        st.write("Conclusion : **Ce client N'EST PAS susceptible de souscrire à un dépôt à terme.**")
-                    else:
-                        st.write("Conclusion : **Ce client EST susceptible de souscrire à un dépôt à terme.**")
-                
-        
-                
-                elif option_to_add == "Dernier_contact":
-                
-                    #ptions basées selon valeur de previous
-                    if previous == 0:
-                        contact_options = ['Client jamais contacté']
-                    else:
-                        contact_options = ['Client contacté il y a moins de 6 mois', 'Client contacté il y a plus de 6 mois']
-                    
-                    # Afficher le selectbox avec les options déterminées
-                    if option_to_add == "Dernier_contact":
-                        Dernier_contact = st.selectbox(
-                            "À quand remonte le dernier contact avec le client lors de la précédente campagne?", 
-                            options=contact_options
-                        )
- 
-                    pred_df['Client_Category_M'] = Dernier_contact
-                    pred_df['Client_Category_M'] = pred_df['Client_Category_M'].replace(['Client jamais contacté', 'Client contacté il y a moins de 6 mois', 'Client contacté il y a plus de 6 mois'], [0, 1, 2])
-                    
-                    # Étape 2 : Concaténer dff et pred_df
-                    # Concaténer les deux DataFrames dff et pred_df sur les colonnes numériques
-                    num_cols = ['age', 'balance','previous']
-                    
-                    # Utiliser un index unique pour pred_df, en le commençant après la dernière ligne de dff
-                    pred_df.index = range(dff_TEST_client_category.shape[0], dff_TEST_client_category.shape[0] + len(pred_df))
-                
-                    combined_df_client_category = pd.concat([dff_TEST_client_category[num_cols], pred_df[num_cols]], axis=0)
-        
-                    # Étape 3 : Standardisation des données numériques
-                    scaler = StandardScaler()
-                    combined_df_client_category[num_cols] = scaler.fit_transform(combined_df_client_category[num_cols])
-        
-                    # Étape 4 : Séparer à nouveau pred_df des autres données
-                    # On récupère uniquement les lignes correspondant à pred_df en utilisant l'index spécifique
-                    pred_df[num_cols] = combined_df_client_category.loc[pred_df.index, num_cols]
-                
-                    # Réinitialiser l'index de pred_df après la manipulation (facultatif)
-                    pred_df = pred_df.reset_index(drop=True)
-                    
-                     # Conditions pour charger le modèle approprié
-                    filename_client_category = "XGBOOST_1_SD_model_PRED_client_category_XGBOOST_1.pkl"
-                    additional_model = joblib.load(filename_client_category)
-                    explainer = shap.TreeExplainer(additional_model)
-                    shap_values_client_category = explainer.shap_values(pred_df)
-                    shap_values_client_category_rounded = np.round(shap_values_client_category, 2)
-                    #st.write("Dataframe du client en question")
-                    #st.dataframe(pred_df)
-                 
-                    # Prédiction avec le DataFrame optimisé
-                    prediction_opt_client_category = additional_model.predict(pred_df)
-                    prediction_proba_opt_client_category = additional_model.predict_proba(pred_df)
-                    max_proba_opt_client_category = np.max(prediction_proba_opt_client_category[0]) * 100
-                
-                    # Affichage des résultats
-                    st.markdown(f"Prediction après affinage : **{prediction_opt_client_category[0]}**")
-                    if max_proba_opt_client_category > max_proba:
-                        variation = "en hausse"
-                    elif max_proba_opt_client_category == max_proba:
-                        variation = "inchangé"
-                    else:
-                        variation = "en baisse"
-                    
-                    # Affiche le niveau de confiance après affinage avec la variation
-                    st.markdown(f"Niveau de confiance après affinage : **{max_proba_opt_client_category:.2f}%** (**{variation}** avec cette nouvelle information sur le client)")
-
-                    st.write("Force plot du client :")
-                    shap.initjs() 
-                    shap.force_plot(explainer.expected_value, shap_values_client_category_rounded, pred_df, matplotlib=True)
-                    fig = plt.gcf()
-                    st.pyplot(fig)
-                    plt.close()
-                 
-                    if prediction_opt_client_category[0] == 0:
-                        st.write("Conclusion : **Ce client N'EST PAS susceptible de souscrire à un dépôt à terme.**")
-                    else:
-                        st.write("Conclusion : **Ce client EST susceptible de souscrire à un dépôt à terme.**")
-                
-    
-    
-                # Afficher le récapitulatif
-                st.write(f'### Récapitulatif')
-                st.markdown(f"Le client a **{age} ans**")
-                st.markdown(f"Le client a un niveau d'étude **{education}**")
-                st.markdown(f"Le solde de son compte en banque est de **{balance} euros**")
-                st.markdown(f"Le client a-t-il un crédit immobilier : **{housing}**")
-                # Mapper les options à des valeurs entières
-                if previous == 0 :
-                    previous = "0 fois"
-                elif previous == 1 :
-                    previous = "1 fois"
-                else:  # "2 fois ou plus"
-                    previous = "2 fois ou plus"
-                st.markdown(f"Le client a été contacté **{previous}** avant cette campagne marketing")
-                
-                # Afficher les informations supplémentaires définies
-                if option_to_add == "loan":
-                    st.markdown(f"A un crédit personnel : **{loan}**")
-                elif option_to_add == "marital":
-                    st.markdown(f"Situation maritale : **{marital}**")
-                elif option_to_add == "poutcome":
-                    st.markdown(f"Résultat de la précédente campagne : **{poutcome}**")
-                elif option_to_add == "job":
-                    st.markdown(f"Emploi : **{job}**")
-                elif option_to_add == "Dernier_contact":
-                    st.markdown(f"Dernier contact avec le client lors de la précédente campagne : **{Dernier_contact}**")
-         
-    
-    
+if selected == 'Outil  Prédictif':
+    st.title("Outil Prédictif")
+    st.write("Utilisez cet outil pour prédire la souscription d'un client à un dépôt à terme.")
+    age = st.number_input("Âge du client", min_value=18, max_value=100, value=30)
+    balance = st.number_input("Solde du client", value=1000)
+    duration = st.number_input("Durée de l'appel (en secondes)", value=100)
+    campaign = st.number_input("Nombre de contacts pendant la campagne", value=1)
+    previous = st.number_input("Nombre de contacts précédents", value=0)
+    # Ajoutez d'autres champs selon vos besoins
+    if st.button("Prédire"):
+        # Dummy prediction (à remplacer par un vrai modèle)
+        st.success("Résultat de la prédiction : Oui (exemple)")
