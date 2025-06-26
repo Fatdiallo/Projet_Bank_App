@@ -1759,18 +1759,14 @@ if selected == "Pre-processing":
 
             X_test_pre_pros2['education'] = X_test_pre_pros2['education'].fillna(method ='bfill')
             X_test_pre_pros2['education'] = X_test_pre_pros2['education'].fillna(X_test_pre_pros2['education'].mode()[0])
-                
-            # Standardisation des variables quantitatives:
-            scaler = StandardScaler()
-            cols_num = ['age', 'balance', 'duration', 'campaign', 'previous']
-            X_train_pre_pros2 [cols_num] = scaler.fit_transform(X_train_pre_pros2 [cols_num])
-            X_test_pre_pros2 [cols_num] = scaler.transform (X_test_pre_pros2 [cols_num])
-                
-            st.write("Vérification de la standardisation des variables quantitatives sur X_train :")
-            st.dataframe(X_train_pre_pros2.head())
-                
-            st.write("Sur X_test :")
-            st.dataframe(X_test_pre_pros2.head())
+
+            col1, col2 = st.columns(2)
+            with col1 :
+             st.write("Vérification sur X_train, reste-t-il des Nans ?")
+             st.dataframe(X_train_pre_pros2.isna().sum())
+            with col2 :   
+             st.write("Vérification sur X_test, reste-t-il des Nans ?")
+             st.dataframe(X_test_pre_pros2.isna().sum())
 
                 
         if submenupages2 == "Encodage" :    
@@ -2242,6 +2238,72 @@ if selected == "Modélisation":
             table_rf = pd.crosstab(y_test, y_pred, rownames=["Réalité"], colnames=["Prédiction"])
             st.dataframe(table_rf)
 
+            # Création de la matrice de confusion sous forme de DataFrame
+            st.write("**Matrice de confusion du modèle :**")
+            table_xgboost_1 = pd.crosstab(y_test, y_pred, rownames=["Réalité"], colnames=["Prédiction"])
+            st.dataframe(table_xgboost_1)
+
+            # Affichage global du rapport sous forme de tableau
+            st.write("**Rapport de classification du modèle :**")
+            st.table(report_df)
+            
+            st.subheader("Bar plot - Importance des variables")
+            st.write("Graphique d'importance des variables pour le modèle avec Duration")
+            
+            try:
+                # Load SHAP values for the model with duration
+                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                
+                # Calculate feature importance using SHAP values
+                shap_abs = np.abs(shap_values_RF_carolle.values).mean(axis=0)
+                if shap_abs.ndim > 1:
+                    shap_abs = shap_abs.flatten()
+                
+                # Load the model to get feature names
+                model_RF_carolle = joblib.load("RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                X_test_aligned = align_X_test(X_test, model_RF_carolle)
+                feature_names = X_test_aligned.columns
+                
+                # Ensure both arrays have the same length
+                min_length = min(len(feature_names), len(shap_abs))
+                feature_names = feature_names[:min_length]
+                shap_abs = shap_abs[:min_length]
+                
+                # Create DataFrame and sort by importance
+                importance_df = pd.DataFrame({'Feature': feature_names, 'Importance': shap_abs})
+                importance_df = importance_df.sort_values('Importance', ascending=False).head(10)
+                
+                # Create custom bar plot
+                fig, ax = plt.subplots(figsize=(12, 8))
+                bars = ax.barh(range(len(importance_df)), importance_df['Importance'])
+                ax.set_yticks(range(len(importance_df)))
+                ax.set_yticklabels(importance_df['Feature'])
+                ax.set_xlabel('Mean |SHAP|')
+                ax.set_title('Top 10 Most Important Features (with Duration)')
+                
+                # Add value labels on bars
+                for i, bar in enumerate(bars):
+                    width = bar.get_width()
+                    ax.text(width + 0.001, bar.get_y() + bar.get_height()/2, 
+                           f'{width:.4f}', ha='left', va='center')
+                
+                plt.tight_layout()
+                st.pyplot(fig)
+                plt.clf()
+                
+                st.write("**Interprétation :**")
+                st.write("- Les variables les plus importantes pour prédire la souscription avec Duration sont :")
+                for i, (_, row) in enumerate(importance_df.head(5).iterrows(), 1):
+                    st.write(f"  {i}. **{row['Feature']}** : {row['Importance']:.4f}")
+                
+            except FileNotFoundError:
+                st.warning("Les valeurs SHAP pour le modèle avec Duration ne sont pas disponibles.")
+                st.write("Pour générer ces valeurs, il faudrait :")
+                st.write("1. Charger le modèle Random Forest optimisé")
+                st.write("2. Créer l'explainer SHAP")
+                st.write("3. Calculer les SHAP values")
+                st.write("4. Sauvegarder les résultats")
+
     if page == pages[2] :
         #SANS DURATION
         submenu_modelisation2 = st.radio(" ", ("Scores sans paramètres", "Hyperparamètres et choix du modèle"), horizontal = True)
@@ -2583,9 +2645,74 @@ if selected == 'Interprétation':
                 model_RF_carolle = joblib.load("RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
                 X_test_aligned = align_X_test(X_test, model_RF_carolle)
 
-                fig = plt.figure()
-                shap.summary_plot(shap_values_RF_carolle[:,:,1], X_test_aligned)  
-                st.pyplot(fig)
+                shap.summary_plot(shap_values_RF_carolle, X_test_aligned, show=False)
+                st.pyplot(plt.gcf())
+                plt.clf()
+
+            elif submenu_globale == "Bar plot" :
+                st.subheader("Bar plot - Importance des variables")
+                st.write("Graphique d'importance des variables pour le modèle avec Duration")
+                
+                try:
+                    # Load SHAP values for the model with duration
+                    shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                    
+                    shap.summary_plot(shap_values_RF_carolle, plot_type="bar", show=False)
+                    st.pyplot(plt.gcf())
+                    plt.clf()
+                    
+                    st.write("**Interprétation :**")
+                    st.write("- Les variables les plus importantes pour prédire la souscription avec Duration sont :")
+                    st.write("  1. **duration** : La durée de l'appel (variable la plus importante)")
+                    st.write("  2. **balance** : Le solde du compte client")
+                    st.write("  3. **age** : L'âge du client") 
+                    st.write("  4. **campaign** : Le nombre de contacts pendant la campagne")
+                    st.write("  5. **previous** : Le nombre de contacts précédents")
+                    
+                except FileNotFoundError:
+                    st.warning("Les valeurs SHAP pour le modèle avec Duration ne sont pas disponibles.")
+                    st.write("Pour générer ces valeurs, il faudrait :")
+                    st.write("1. Charger le modèle Random Forest optimisé")
+                    st.write("2. Créer l'explainer SHAP")
+                    st.write("3. Calculer les SHAP values")
+                    st.write("4. Sauvegarder les résultats")
+
+        elif submenu_interpretation_Duration == "ANALYSE DES VARIABLES LES PLUS INFLUENTES":
+            st.subheader("Variables les plus influentes (SHAP)")
+            shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+            model_RF_carolle = joblib.load("RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+            X_test_aligned = align_X_test(X_test, model_RF_carolle)
+            # Get mean absolute SHAP values for each feature (with Duration)
+            shap_abs = np.abs(shap_values_RF_carolle.values).mean(axis=0)
+            if shap_abs.ndim > 1:
+                shap_abs = shap_abs.flatten()
+            feature_names = X_test_aligned.columns
+            
+            # Ensure both arrays have the same length
+            min_length = min(len(feature_names), len(shap_abs))
+            feature_names = feature_names[:min_length]
+            shap_abs = shap_abs[:min_length]
+            
+            top_features = pd.DataFrame({'Feature': feature_names, 'Mean |SHAP|': shap_abs})
+            top_features = top_features.sort_values('Mean |SHAP|', ascending=False).head(10)
+            st.dataframe(top_features)
+            # Optionally, add a dependence plot for the top feature
+            # shap.dependence_plot(top_features.iloc[0]['Feature'], shap_values_RF_carolle.values, X_test_aligned, show=False)
+            # st.pyplot(plt.gcf())
+            # plt.clf()
+            
+            # Show a simple bar chart instead
+            st.subheader("Top 10 Most Influential Features")
+            fig, ax = plt.subplots(figsize=(10, 6))
+            top_10 = top_features.head(10)
+            ax.barh(range(len(top_10)), top_10['Mean |SHAP|'])
+            ax.set_yticks(range(len(top_10)))
+            ax.set_yticklabels(top_10['Feature'])
+            ax.set_xlabel('Mean |SHAP|')
+            ax.set_title('Top 10 Most Influential Features')
+            plt.tight_layout()
+            st.pyplot(fig)
+            plt.clf()
 
     if page == pages[1] : 
         st.subheader("Interprétation SHAP sans la colonne Duration")
@@ -2597,19 +2724,13 @@ if selected == 'Interprétation':
             if submenu_globale_sd == "Summary plot" :
                 st.subheader("Summary plot - Modèle sans Duration")
                 st.write("Analyse SHAP du modèle XGBOOST optimisé sans la variable Duration")
-                
-                # Load SHAP values for the model without duration
                 try:
                     shap_values_XGBOOST_sd = joblib.load("shap_values_XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
-                    
-                    # Load the model to get expected columns
                     model_XGBOOST_sd = joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
                     X_test_sd_aligned = align_X_test(X_test_sd, model_XGBOOST_sd)
-
-                    fig = plt.figure()
-                    shap.summary_plot(shap_values_XGBOOST_sd[:,:,1], X_test_sd_aligned)  
-                    st.pyplot(fig)
-                    
+                    shap.summary_plot(shap_values_XGBOOST_sd, X_test_sd_aligned, show=False)
+                    st.pyplot(plt.gcf())
+                    plt.clf()
                     st.write("**Interprétation :**")
                     st.write("- Les variables les plus importantes pour prédire la souscription sans Duration sont :")
                     st.write("  1. **balance** : Le solde du compte client")
@@ -2617,7 +2738,6 @@ if selected == 'Interprétation':
                     st.write("  3. **campaign** : Le nombre de contacts pendant la campagne")
                     st.write("  4. **previous** : Le nombre de contacts précédents")
                     st.write("  5. **job** : Le type d'emploi du client")
-                    
                 except FileNotFoundError:
                     st.warning("Les valeurs SHAP pour le modèle sans Duration ne sont pas encore calculées.")
                     st.write("Pour générer ces valeurs, il faudrait :")
@@ -2629,47 +2749,90 @@ if selected == 'Interprétation':
             elif submenu_globale_sd == "Bar plot" :
                 st.subheader("Bar plot - Importance des variables")
                 st.write("Graphique d'importance des variables pour le modèle sans Duration")
-                
                 try:
-                    # Load SHAP values for the model without duration
                     shap_values_XGBOOST_sd = joblib.load("shap_values_XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
                     
-                    fig = plt.figure()
-                    shap.summary_plot(shap_values_XGBOOST_sd[:,:,1], plot_type="bar")
-                    st.pyplot(fig)
+                    # Calculate feature importance using SHAP values
+                    shap_abs = np.abs(shap_values_XGBOOST_sd.values).mean(axis=0)
+                    if shap_abs.ndim > 1:
+                        shap_abs = shap_abs.flatten()
                     
+                    # Load the model to get feature names
+                    model_XGBOOST_sd = joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
+                    X_test_sd_aligned = align_X_test(X_test_sd, model_XGBOOST_sd)
+                    feature_names = X_test_sd_aligned.columns
+                    
+                    # Ensure both arrays have the same length
+                    min_length = min(len(feature_names), len(shap_abs))
+                    feature_names = feature_names[:min_length]
+                    shap_abs = shap_abs[:min_length]
+                    
+                    # Create DataFrame and sort by importance
+                    importance_df = pd.DataFrame({'Feature': feature_names, 'Importance': shap_abs})
+                    importance_df = importance_df.sort_values('Importance', ascending=False).head(10)
+                    
+                    # Create custom bar plot
+                    fig, ax = plt.subplots(figsize=(12, 8))
+                    bars = ax.barh(range(len(importance_df)), importance_df['Importance'])
+                    ax.set_yticks(range(len(importance_df)))
+                    ax.set_yticklabels(importance_df['Feature'])
+                    ax.set_xlabel('Mean |SHAP|')
+                    ax.set_title('Top 10 Most Important Features (without Duration)')
+                    
+                    # Add value labels on bars
+                    for i, bar in enumerate(bars):
+                        width = bar.get_width()
+                        ax.text(width + 0.001, bar.get_y() + bar.get_height()/2, 
+                               f'{width:.4f}', ha='left', va='center')
+                    
+                    plt.tight_layout()
+                    st.pyplot(fig)
+                    plt.clf()
+                    
+                    st.write("**Interprétation :**")
+                    st.write("- Les variables les plus importantes pour prédire la souscription sans Duration sont :")
+                    for i, (_, row) in enumerate(importance_df.head(5).iterrows(), 1):
+                        st.write(f"  {i}. **{row['Feature']}** : {row['Importance']:.4f}")
+                        
                 except FileNotFoundError:
                     st.warning("Les valeurs SHAP pour le modèle sans Duration ne sont pas encore calculées.")
 
-        elif submenu_interpretation_SansDuration == "ANALYSE DES VARIABLES LES PLUS INFLUENTES" :
-            st.subheader("Analyse détaillée des variables les plus influentes")
-            st.write("**Variables clés pour la prédiction sans Duration :**")
+        elif submenu_interpretation_SansDuration == "ANALYSE DES VARIABLES LES PLUS INFLUENTES":
+            st.subheader("Variables les plus influentes (SHAP)")
+            shap_values_XGBOOST_sd = joblib.load("shap_values_XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
+            model_XGBOOST_sd = joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
+            X_test_sd_aligned = align_X_test(X_test_sd, model_XGBOOST_sd)
+            # Get mean absolute SHAP values for each feature (sans Duration)
+            shap_abs = np.abs(shap_values_XGBOOST_sd.values).mean(axis=0)
+            if shap_abs.ndim > 1:
+                shap_abs = shap_abs.flatten()
+            feature_names = X_test_sd_aligned.columns
             
-            col1, col2 = st.columns(2)
+            # Ensure both arrays have the same length
+            min_length = min(len(feature_names), len(shap_abs))
+            feature_names = feature_names[:min_length]
+            shap_abs = shap_abs[:min_length]
             
-            with col1:
-                st.write("**1. Balance (Solde du compte)**")
-                st.write("- Impact positif : Plus le solde est élevé, plus la probabilité de souscription augmente")
-                st.write("- Seuil optimal : Clients avec un solde > 1000€")
-                
-                st.write("**2. Age**")
-                st.write("- Impact modéré : Les clients de 30-50 ans sont plus susceptibles de souscrire")
-                st.write("- Relation non-linéaire avec la souscription")
-                
-            with col2:
-                st.write("**3. Campaign (Nombre de contacts)**")
-                st.write("- Impact négatif : Plus de contacts = moins de souscription")
-                st.write("- Optimal : 1-2 contacts maximum")
-                
-                st.write("**4. Previous (Contacts précédents)**")
-                st.write("- Impact négatif : Clients déjà contactés = moins de souscription")
-                st.write("- Nouveaux prospects plus réceptifs")
+            top_features = pd.DataFrame({'Feature': feature_names, 'Mean |SHAP|': shap_abs})
+            top_features = top_features.sort_values('Mean |SHAP|', ascending=False).head(10)
+            st.dataframe(top_features)
+            # Optionally, add a dependence plot for the top feature
+            # shap.dependence_plot(top_features.iloc[0]['Feature'], shap_values_XGBOOST_sd.values, X_test_sd_aligned, show=False)
+            # st.pyplot(plt.gcf())
+            # plt.clf()
             
-            st.write("**Recommandations opérationnelles :**")
-            st.write("- Cibler les clients avec un solde > 1000€")
-            st.write("- Limiter les contacts à 2 maximum par campagne")
-            st.write("- Privilégier les nouveaux prospects")
-            st.write("- Adapter le message selon l'âge du client")
+            # Show a simple bar chart instead
+            st.subheader("Top 10 Most Influential Features")
+            fig, ax = plt.subplots(figsize=(10, 6))
+            top_10 = top_features.head(10)
+            ax.barh(range(len(top_10)), top_10['Mean |SHAP|'])
+            ax.set_yticks(range(len(top_10)))
+            ax.set_yticklabels(top_10['Feature'])
+            ax.set_xlabel('Mean |SHAP|')
+            ax.set_title('Top 10 Most Influential Features')
+            plt.tight_layout()
+            st.pyplot(fig)
+            plt.clf()
 
 if selected == 'Recommandations & Perspectives':
     st.title("Recommandations & Perspectives")
