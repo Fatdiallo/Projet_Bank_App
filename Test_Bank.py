@@ -2609,170 +2609,432 @@ if selected == 'Interprétation':
     page=st.sidebar.radio('AVEC ou SANS Duration', pages)
 
     if page == pages[0] : 
-        submenu_interpretation_Duration = st.radio(
-            "Choisissez le type d'analyse SHAP :",
-            ("ANALYSE GLOBALE", "ANALYSE DES VARIABLES LES PLUS INFLUENTES"),
-            horizontal=True,
-            label_visibility='collapsed'
-        )
-        st.markdown("""
-        <div style='background-color:#e3f2fd; padding:10px; border-radius:10px; margin-bottom:20px;'>
-            <h2 style='color:#1976d2;'>📊 Interprétation SHAP avec la colonne Duration</h2>
-            <p style='color:#333;'>Visualisez l'importance et l'impact de chaque variable sur la prédiction du modèle.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.subheader("Summary plot")
-        st.markdown("#### <span style='color:#1f77b4'>Interprétation visuelle des variables les plus influentes</span>", unsafe_allow_html=True)
-        if submenu_interpretation_Duration == "ANALYSE GLOBALE":
-            submenu_globale = st.radio("Choisissez le type de graphique :", ("Summary plot", "Bar plot"), horizontal=True, label_visibility='collapsed')
-            if submenu_globale == "Summary plot":
-                st.subheader("Summary plot - Modèle avec Duration")
-                st.write("Analyse SHAP du modèle Random Forest optimisé avec la variable Duration")
-                try:
-                    shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
-                    model_RF_carolle = joblib.load("RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
-                    X_test_aligned = align_X_test(X_test, model_RF_carolle)
-                    plt.rcParams.update({'font.size': 14, 'axes.titlesize': 18, 'axes.labelsize': 16, 'xtick.labelsize': 13, 'ytick.labelsize': 13})
-                    fig = plt.figure(figsize=(12, 8))
-                    plt.title("\nInterprétation SHAP - Variables les plus influentes", color="#1976d2", fontsize=20, weight='bold')
-                    shap.summary_plot(shap_values_RF_carolle[:,:,1], X_test_aligned, show=False)
-                    plt.grid(axis='x', linestyle='--', alpha=0.5)
-                    st.pyplot(fig)
-                    plt.clf()
-                except Exception as e:
-                    st.error(f"Error in summary plot: {e}")
-            elif submenu_globale == "Bar plot":
-                st.subheader("Bar plot - Importance des variables")
-                st.write("Graphique d'importance des variables pour le modèle avec Duration")
-                try:
-                    shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
-                    shap_abs = np.abs(shap_values_RF_carolle.values[:,:,1]).mean(axis=0)
-                    if shap_abs.ndim > 1:
-                        shap_abs = shap_abs.flatten()
-                    model_RF_carolle = joblib.load("RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
-                    X_test_aligned = align_X_test(X_test, model_RF_carolle)
-                    feature_names = X_test_aligned.columns
-                    min_length = min(len(feature_names), len(shap_abs))
-                    feature_names = feature_names[:min_length]
-                    shap_abs = shap_abs[:min_length]
-                    importance_df = pd.DataFrame({'Feature': feature_names, 'Importance': shap_abs})
-                    importance_df = importance_df.sort_values('Importance', ascending=False).head(10)
-                    fig, ax = plt.subplots(figsize=(12, 8))
-                    bars = ax.barh(range(len(importance_df)), importance_df['Importance'])
-                    ax.set_yticks(range(len(importance_df)))
-                    ax.set_yticklabels(importance_df['Feature'])
-                    ax.set_xlabel('Mean |SHAP|')
-                    ax.set_title('Top 10 Most Important Features (with Duration)')
-                    for i, bar in enumerate(bars):
-                        width = bar.get_width()
-                        ax.text(width + 0.001, bar.get_y() + bar.get_height()/2, f'{width:.4f}', ha='left', va='center')
-                    plt.tight_layout()
-                    st.pyplot(fig)
-                    plt.clf()
-                except Exception as e:
-                    st.error(f"Error in bar plot: {e}")
-        elif submenu_interpretation_Duration == "ANALYSE DES VARIABLES LES PLUS INFLUENTES":
-            st.subheader("Variables les plus influentes (SHAP)")
-            shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
-            model_RF_carolle = joblib.load("RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
-            X_test_aligned = align_X_test(X_test, model_RF_carolle)
-            shap_abs = np.abs(shap_values_RF_carolle.values).mean(axis=0)
-            if shap_abs.ndim > 1:
-                shap_abs = shap_abs.flatten()
-            feature_names = X_test_aligned.columns
-            min_length = min(len(feature_names), len(shap_abs))
-            feature_names = feature_names[:min_length]
-            shap_abs = shap_abs[:min_length]
-            top_features = pd.DataFrame({'Feature': feature_names, 'Mean |SHAP|': shap_abs})
-            top_features = top_features.sort_values('Mean |SHAP|', ascending=False).head(10)
-            st.dataframe(top_features)
-            st.subheader("Top 10 Most Influential Features")
-            fig, ax = plt.subplots(figsize=(10, 6))
-            top_10 = top_features.head(10)
-            ax.barh(range(len(top_10)), top_10['Mean |SHAP|'])
-            ax.set_yticks(range(len(top_10)))
-            ax.set_yticklabels(top_10['Feature'])
-            ax.set_xlabel('Mean |SHAP|')
-            ax.set_title('Top 10 Most Influential Features')
-            plt.tight_layout()
-            st.pyplot(fig)
-            plt.clf()
+        st.subheader("Interprétation SHAP avec la colonne Duration")
+        submenu_interpretation_Duration = st.radio("", ("ANALYSE GLOBALE", "ANALYSE DES VARIABLES LES PLUS INFLUENTES"), horizontal=True)
 
+        if submenu_interpretation_Duration == "ANALYSE GLOBALE" :
+            submenu_globale = st.radio("", ("Summary plot", "Bar plot"), horizontal=True) 
+
+            if submenu_globale == "Summary plot" :
+                st.subheader("Summary plot")
+                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                fig = plt.figure()
+                shap.summary_plot(shap_values_RF_carolle[:,:,1], X_test)  
+                st.pyplot(fig)
+
+            if submenu_globale == "Bar plot" :
+                st.subheader("Bar plot")  
+                st.write("Visualisons les Poids des Variables dans le modèle")
+                shap_values_rf_carolle_transformed = joblib.load("shap_values_rf_carolle_transformed.pkl")
+                terms_to_exclude = ['month', 'weekday', 'job', 'poutcome', 'marital']
+                filtered_columns = [col for col in X_test.columns if not any(term in col for term in terms_to_exclude)]
+                filtered_indices = [X_test.columns.get_loc(col) for col in filtered_columns]
+                shap_values_filtered = shap_values_rf_carolle_transformed[:, filtered_indices]
+                explanation_filtered = shap.Explanation(values=shap_values_filtered,
+                                            data=X_test.values[:, filtered_indices],
+                                            feature_names=filtered_columns)
+                def get_mean_shap_values(column_names, shap_values):
+                    indices = [X_test.columns.get_loc(col) for col in column_names]
+                    values = shap_values.values[:, indices]
+                    return np.mean(np.abs(values), axis=0)
+                month_columns = [col for col in X_test.columns if 'month' in col]
+                weekday_columns = [col for col in X_test.columns if 'weekday' in col]
+                poutcome_columns = [col for col in X_test.columns if 'poutcome' in col]
+                job_columns = [col for col in X_test.columns if 'job' in col]
+                marital_columns = [col for col in X_test.columns if 'marital' in col]
+                mean_shap_month = get_mean_shap_values(month_columns, shap_values_rf_carolle_transformed)
+                mean_shap_weekday = get_mean_shap_values(weekday_columns, shap_values_rf_carolle_transformed)
+                mean_shap_poutcome = get_mean_shap_values(poutcome_columns, shap_values_rf_carolle_transformed)
+                mean_shap_job = get_mean_shap_values(job_columns, shap_values_rf_carolle_transformed)
+                mean_shap_marital = get_mean_shap_values(marital_columns, shap_values_rf_carolle_transformed)
+                combined_values = [np.mean(mean_shap_month),
+                                        np.mean(mean_shap_weekday),
+                                        np.mean(mean_shap_poutcome),
+                                        np.mean(mean_shap_job),
+                                        np.mean(mean_shap_marital)]
+                combined_feature_names = ['Mean SHAP Value for Month Features',
+                                            'Mean SHAP Value for Weekday Features',
+                                            'Mean SHAP Value for Poutcome Features',
+                                            'Mean SHAP Value for Job Features',
+                                            'Mean SHAP Value for Marital Features']
+                explanation_combined = shap.Explanation(values=combined_values,
+                                                            data=np.array([[np.nan]] * len(combined_values)),
+                                                            feature_names=combined_feature_names)
+                num_samples = explanation_filtered.values.shape[0]
+                combined_values_reshaped = np.repeat(np.array(explanation_combined.values)[:, np.newaxis], num_samples, axis=1).T
+                combined_values = np.concatenate([explanation_filtered.values, combined_values_reshaped], axis=1)
+                combined_feature_names = (explanation_filtered.feature_names + explanation_combined.feature_names)
+                explanation_combined_new = shap.Explanation(values=combined_values,data=np.array([[np.nan]] * combined_values.shape[0]),feature_names=combined_feature_names)
+                fig = plt.figure(figsize=(10, 6))
+                shap.plots.bar(explanation_combined_new, max_display=len(explanation_combined_new.feature_names))
+                st.pyplot(fig)
+                st.write("")
+
+        if submenu_interpretation_Duration == "ANALYSE DES VARIABLES LES PLUS INFLUENTES" :
+            submenu_var_inf = st.radio("", ("DURATION", "HOUSING", "PREVIOUS"), horizontal=True) 
+            if submenu_var_inf == "DURATION" :
+                st.write("#### DURATION : Poids de +0.19 dans les prédictions de notre modèle")  
+                st.subheader("Impact POSITIF de DURATION sur la classe 1")
+                st.write("Summary plot :")
+                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
+                fig = plt.figure()
+                shap.summary_plot(shap_values_RF_CAROLLE_1[:, [X_test.columns.get_loc("duration")]], 
+                                  X_test[["duration"]], 
+                                  feature_names=["duration"], 
+                                  show=True)
+                st.pyplot(fig)
+                st.write("##### Dependence plot")
+                shap_CAROLLE_VALUES = shap_values_RF_CAROLLE_1.values
+                X_test_original_data = X_test_original
+                feature_name = "duration"
+                fig = plt.figure(figsize=(20, 8))
+                shap.dependence_plot(feature_name, shap_values=shap_CAROLLE_VALUES, features=X_test_original_data, interaction_index=feature_name, show=False)
+                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
+                x_ticks = np.arange(0, X_test_original_data[feature_name].max() + 1,360)
+                plt.xticks(x_ticks)
+                fig = plt.gcf()          
+                st.pyplot(fig)       
+                plt.close() 
+            if submenu_var_inf == "HOUSING" :
+                st.write("#### HOUSING : poids de +0.05 dans les prédictions de notre modèle") 
+                st.subheader("Impact NEGATIF de HOUSING sur la classe 1")
+                st.write("Summary plot :")
+                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
+                fig = plt.figure()
+                shap.summary_plot(shap_values_RF_CAROLLE_1[:, [X_test.columns.get_loc("housing")]], 
+                                  X_test[["housing"]], 
+                                  feature_names=["housing"], 
+                                  show=True)
+                st.pyplot(fig)
+            if submenu_var_inf == "PREVIOUS" :
+                st.write("#### PREVIOUS : poids de +0.03 dans les prédictions de notre modèle") 
+                st.subheader("Impact POSITIF de PREVIOUS sur la classe 1")
+                st.write("Summary plot :")
+                shap_values_RF_carolle = joblib.load("shap_values_RF_carolle_model_AD_TOP_3_hyperparam_TEAM.pkl")
+                shap_values_RF_CAROLLE_1 = shap_values_RF_carolle[:,:,1]
+                fig = plt.figure()
+                shap.summary_plot(shap_values_RF_CAROLLE_1[:, [X_test.columns.get_loc("previous")]], 
+                                  X_test[["previous"]], 
+                                  feature_names=["previous"], 
+                                  show=True)
+                st.pyplot(fig)
     if page == pages[1] : 
-        st.subheader("Interprétation SHAP sans la colonne Duration")
-        submenu_interpretation_SansDuration = st.radio("Choisissez le type d'analyse SHAP :", ("ANALYSE GLOBALE", "ANALYSE DES VARIABLES LES PLUS INFLUENTES"), horizontal=True, label_visibility='collapsed')
-
-        if submenu_interpretation_SansDuration == "ANALYSE GLOBALE" :
-            submenu_globale_sd = st.radio("", ("Summary plot", "Bar plot"), horizontal=True) 
-
-            if submenu_globale_sd == "Summary plot" :
-                st.subheader("Summary plot - Modèle sans Duration")
-                st.write("Analyse SHAP du modèle XGBOOST optimisé sans la variable Duration")
-                try:
-                    shap_values_XGBOOST_sd = joblib.load("shap_values_XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
-                    model_XGBOOST_sd = joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
-                    X_test_sd_aligned = align_X_test(X_test_sd, model_XGBOOST_sd)
-                    shap.summary_plot(shap_values_XGBOOST_sd, X_test_sd_aligned, show=False)
-                    st.pyplot(plt.gcf())
-                    plt.clf()
-                except FileNotFoundError:
-                    st.warning("Les valeurs SHAP pour le modèle sans Duration ne sont pas encore calculées.")
-            elif submenu_globale_sd == "Bar plot" :
-                st.subheader("Bar plot - Importance des variables")
-                st.write("Graphique d'importance des variables pour le modèle sans Duration")
-                try:
-                    shap_values_XGBOOST_sd = joblib.load("shap_values_XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
-                    shap_abs = np.abs(shap_values_XGBOOST_sd.values).mean(axis=0)
-                    if shap_abs.ndim > 1:
-                        shap_abs = shap_abs.flatten()
-                    model_XGBOOST_sd = joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
-                    X_test_sd_aligned = align_X_test(X_test_sd, model_XGBOOST_sd)
-                    feature_names = X_test_sd_aligned.columns
-                    min_length = min(len(feature_names), len(shap_abs))
-                    feature_names = feature_names[:min_length]
-                    shap_abs = shap_abs[:min_length]
-                    importance_df = pd.DataFrame({'Feature': feature_names, 'Importance': shap_abs})
-                    importance_df = importance_df.sort_values('Importance', ascending=False).head(10)
-                    fig, ax = plt.subplots(figsize=(12, 8))
-                    bars = ax.barh(range(len(importance_df)), importance_df['Importance'])
-                    ax.set_yticks(range(len(importance_df)))
-                    ax.set_yticklabels(importance_df['Feature'])
-                    ax.set_xlabel('Mean |SHAP|')
-                    ax.set_title('Top 10 Most Important Features (without Duration)')
-                    for i, bar in enumerate(bars):
-                        width = bar.get_width()
-                        ax.text(width + 0.001, bar.get_y() + bar.get_height()/2, f'{width:.4f}', ha='left', va='center')
+        shap_values_XGBOOST_1 = joblib.load("shap_values_XGBOOST_1_SD_TOP_4_hyperparam.pkl")
+        st.subheader("Interprétation du modèle XGBOOST")
+        submenu_interpretation = st.radio("", ("ANALYSE GLOBALE", "ANALYSE DES VARIABLES LES PLUS IMPORTANTES"), horizontal = True)
+        if submenu_interpretation == "ANALYSE GLOBALE" :
+            submenu_global = st.radio("", ("Summary plot", "Bar plot"), horizontal=True)
+            if submenu_global == "Summary plot" :
+                st.subheader("Summary plot")
+                st.write("Le summary plot de SHAP permet d'**évaluer l'impact positif ou négatif de chaque variable sur les prédictions** du modèle.")
+                fig = plt.figure()
+                shap.summary_plot(shap_values_XGBOOST_1, X_test_sd)  
+                st.pyplot(fig)
+            if submenu_global == "Bar plot" :
+                st.subheader("Bar plot")
+                st.write("Pour évaluer l'**impact des variables sur les prédictions du modèle**, le bar plot de la librairie SHAP permet d'afficher les moyennes absolues des valeurs SHAP.")
+                st.write("Nous avons par ailleurs regroupé certaines variables catégorielles dispatchées en plusieurs colonnes après encodage afin d'avoir une vue d'ensemble de leur effet positif ou négatif sur les prédictions.")
+                explanation_XGBOOST_1 = shap.Explanation(values=shap_values_XGBOOST_1,
+                                     data=X_test_sd.values, # Assumant que  X_test est un DataFrame
+                                     feature_names=X_test_sd.columns)
+                shap.plots.bar(explanation_XGBOOST_1)
+                terms_to_exclude = ['month', 'weekday', 'job', 'poutcome', 'marital']
+                filtered_columns = [col for col in X_test_sd.columns if not any(term in col for term in terms_to_exclude)]
+                filtered_indices = [X_test_sd.columns.get_loc(col) for col in filtered_columns]
+                shap_values_filtered_XGBOOST_1 = shap_values_XGBOOST_1[:, filtered_indices]
+                explanation_filtered_XGBOOST_1 = shap.Explanation(values=shap_values_filtered_XGBOOST_1,
+                                                data=X_test_sd.values[:, filtered_indices],
+                                                feature_names=filtered_columns)
+                def get_mean_shap_values(column_names, shap_values):
+                    indices = [X_test_sd.columns.get_loc(col) for col in column_names]
+                    values = shap_values.values[:, indices]
+                    return np.mean(np.abs(values), axis=0)
+                month_columns = [col for col in X_test_sd.columns if 'month' in col]
+                weekday_columns = [col for col in X_test_sd.columns if 'weekday' in col]
+                poutcome_columns = [col for col in X_test_sd.columns if 'poutcome' in col]
+                job_columns = [col for col in X_test_sd.columns if 'job' in col]
+                marital_columns = [col for col in X_test_sd.columns if 'marital' in col]
+                mean_shap_month = get_mean_shap_values(month_columns, shap_values_XGBOOST_1)
+                mean_shap_weekday = get_mean_shap_values(weekday_columns, shap_values_XGBOOST_1)
+                mean_shap_poutcome = get_mean_shap_values(poutcome_columns, shap_values_XGBOOST_1)
+                mean_shap_job = get_mean_shap_values(job_columns, shap_values_XGBOOST_1)
+                mean_shap_marital = get_mean_shap_values(marital_columns, shap_values_XGBOOST_1)
+                combined_values_XGBOOST_1 = [np.mean(mean_shap_month),
+                                            np.mean(mean_shap_weekday),
+                                            np.mean(mean_shap_poutcome),
+                                            np.mean(mean_shap_job),
+                                            np.mean(mean_shap_marital)]
+                combined_feature_names_XGBOOST1 = ['Mean SHAP Value for Month Features',
+                                                'Mean SHAP Value for Weekday Features',
+                                                'Mean SHAP Value for Poutcome Features',
+                                                'Mean SHAP Value for Job Features',
+                                                'Mean SHAP Value for Marital Features']
+                explanation_combined_XGBOOST_1 = shap.Explanation(values=combined_values_XGBOOST_1,
+                                                                data=np.array([[np.nan]] * len(combined_values_XGBOOST_1)),
+                                                                feature_names=combined_feature_names_XGBOOST1)
+                num_samples = explanation_filtered_XGBOOST_1.values.shape[0]
+                combined_values_reshaped__XGBOOST_1 = np.repeat(np.array(explanation_combined_XGBOOST_1.values)[:, np.newaxis], num_samples, axis=1).T
+                combined_values_XGBOOST_1 = np.concatenate([explanation_filtered_XGBOOST_1.values, combined_values_reshaped__XGBOOST_1], axis=1)
+                combined_feature_names_XGBOOST_1 = (explanation_filtered_XGBOOST_1.feature_names + explanation_combined_XGBOOST_1.feature_names)
+                explanation_combined_new_XGBOOST_1 = shap.Explanation(values=combined_values_XGBOOST_1,data=np.array([[np.nan]] * combined_values_XGBOOST_1.shape[0]),feature_names=combined_feature_names_XGBOOST_1)
+                fig = plt.figure(figsize=(10, 6))
+                shap.plots.bar(explanation_combined_new_XGBOOST_1, max_display=len(explanation_combined_new_XGBOOST_1.feature_names))
+                st.pyplot(fig)
+                st.subheader("Choix des variables les plus importantes")
+                st.write("1. **HOUSING** : détention ou non d'un prêt immobilier")
+                st.write("2. **BALANCE** : solde bancaire du client")
+                st.write("3. **ÂGE**")
+                st.write("4. **PREVIOUS** : nombre de contacts effectués avant cette campagne avec le client")
+                st.write("5. **CAMPAIGN** : nombre de contacts effectués avec le client pendant la campagne (dernier contact inclus)")
+                st.write("6. **EDUCATION** : niveau scolaire du client")                
+        if submenu_interpretation == "ANALYSE DES VARIABLES LES PLUS IMPORTANTES" :
+            submenu_local = st.radio("", ("HOUSING", "BALANCE", "AGE", "PREVIOUS", "CAMPAIGN", "EDUCATION", "AUTRES"), horizontal=True)
+            shap_XGBOOST_1_VALUES = shap_values_XGBOOST_1.values
+            X_test_original_figures = X_test_sd_original 
+            if submenu_local == "HOUSING" :
+                st.title("HOUSING : POIDS +0.26")
+                st.subheader("IMPACT NÉGATIF DE HOUSING SUR LA CLASSE 1")
+                st.write("Détenir ou non un prêt immobilier joue un rôle déterminant dans les prédictions de notre modèle.")
+                fig = plt.figure()
+                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("housing")]], 
+                                  X_test_sd[["housing"]], 
+                                  feature_names=["housing"], 
+                                  show=True)
+                st.pyplot(fig)
+                st.write("Les clients avec un prêt immobilier (Housing = 1) ont une probabilité plus faible de souscrire, tandis que **les clients sans prêt (Housing = 0) ont une probabilité plus élevée de souscrire à un dépôt à terme**.")
+            if submenu_local == "BALANCE" :
+                st.title("BALANCE : POIDS +0.24")
+                st.subheader("IMPACT POSITIF DE BALANCE SUR LA CLASSE 1")
+                st.write("Le solde du client semble être déterminant pour la prédiction. Valeurs comprises entre -1451€ et 4048€")
+                fig = plt.figure()
+                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("balance")]], 
+                                  X_test_sd[["balance"]], 
+                                  feature_names=["balance"], 
+                                  show=True)
+                st.pyplot(fig)
+                st.write("On constate ici qu'**un solde bancaire moyen (violet) ou élevé (rouge) augmente la probabilité d'appartenir à la classe 'YES'.**")         
+                feature_name = "balance"
+                st.write("Le dependence plot ci-dessous présente une distribution en courbe confirmant notre précédent constat : **plus la balance est élevée, plus les valeurs SHAP sont positives.**")
+                st.write("On constate cependant qu'au centre de cette courbe, les valeurs de shap sont à la fois positives et négatives.")
+                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
+                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
+                xticks = range(-1500, 4300, 300)
+                plt.grid(True, which='both', linestyle='--', linewidth=0.5) 
+                plt.xticks(xticks, fontsize=5)
+                plt.yticks(fontsize=7) 
+                plt.xlabel('balance',fontsize=7)  
+                plt.ylabel('shap values', fontsize=7)
+                fig = plt.gcf()          
+                st.pyplot(fig)       
+                plt.close() 
+                st.write("")
+                st.write("Effectuons un zoom pour les balances entre 0 et 1500€ pour une meilleure visibilité")
+                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
+                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
+                xticks = range(0, 1500, 100)
+                plt.grid(True, which='both', linestyle='--', linewidth=0.5) 
+                plt.xticks(xticks, fontsize=5)
+                plt.yticks(fontsize=7) 
+                plt.xlabel('balance',fontsize=7)  
+                plt.ylabel('shap values', fontsize=7)
+                plt.xlim(0, 1500)  # Limites de l'axe x
+                fig = plt.gcf()          
+                st.pyplot(fig)       
+                plt.close() 
+                st.markdown("Ce zoom offre une meilleure visibilité :  \n                - Les clients avec un solde compris entre 0 et 300€ affichent majoritairement des valeurs shap négatives  \n                - Les clients avec une balance supérieure à 800€ affichent majoritairement des valeurs shap positives  \n                - Les clients avec un solde compris entre 300 et 800€ sont scindés en deux groupes : une moitié ne souscrit pas au produit, mais l'autre oui.")
+                st.subheader("Recherche d'autres dépendances")
+                st.write("Pour tenter de départager ces clients dont la balance est comprise entre 300 et 800€, examinons leurs relations avec d'autres variables afin d'identifier des tendances.")
+                shap_values = shap_XGBOOST_1_VALUES
+                X_data = X_test_original_figures  
+                interaction_variables = ["housing", "age", "education", "marital status", "job"]
+                selected_variable = st.radio("",interaction_variables, horizontal=True)
+                if selected_variable in ["housing", "age", "education"]:
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    shap.dependence_plot("balance", shap_XGBOOST_1_VALUES, X_test_original_figures, 
+                                         interaction_index=selected_variable, show=False, ax=ax)
+                    ax.axhline(0, color='red', linewidth=1, linestyle='--')
+                    xticks = range(300, 800, 100)
+                    plt.xlim(300, 800) 
                     plt.tight_layout()
                     st.pyplot(fig)
-                    plt.clf()
-                except FileNotFoundError:
-                    st.warning("Les valeurs SHAP pour le modèle sans Duration ne sont pas encore calculées.")
-        elif submenu_interpretation_SansDuration == "ANALYSE DES VARIABLES LES PLUS INFLUENTES":
-            st.subheader("Variables les plus influentes (SHAP)")
-            shap_values_XGBOOST_sd = joblib.load("shap_values_XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
-            model_XGBOOST_sd = joblib.load("XGBOOST_1_model_SD_TOP_4_hyperparam.pkl")
-            X_test_sd_aligned = align_X_test(X_test_sd, model_XGBOOST_sd)
-            shap_abs = np.abs(shap_values_XGBOOST_sd.values).mean(axis=0)
-            if shap_abs.ndim > 1:
-                shap_abs = shap_abs.flatten()
-            feature_names = X_test_sd_aligned.columns
-            min_length = min(len(feature_names), len(shap_abs))
-            feature_names = feature_names[:min_length]
-            shap_abs = shap_abs[:min_length]
-            top_features = pd.DataFrame({'Feature': feature_names, 'Mean |SHAP|': shap_abs})
-            top_features = top_features.sort_values('Mean |SHAP|', ascending=False).head(10)
-            st.dataframe(top_features)
-            st.subheader("Top 10 Most Influential Features")
-            fig, ax = plt.subplots(figsize=(10, 6))
-            top_10 = top_features.head(10)
-            ax.barh(range(len(top_10)), top_10['Mean |SHAP|'])
-            ax.set_yticks(range(len(top_10)))
-            ax.set_yticklabels(top_10['Feature'])
-            ax.set_xlabel('Mean |SHAP|')
-            ax.set_title('Top 10 Most Influential Features')
-            plt.tight_layout()
-            st.pyplot(fig)
-            plt.clf()
+                    plt.close()
+                    if selected_variable in ["housing"] :
+                     st.write("Il n'est pas possible d'établir un lien clair entre la balance de ces clients et la variable housing.")
+                    if selected_variable in ["age"] :
+                     st.write("Il n'est pas possible d'établir un lien clair entre la balance de ces clients et leur âge.")
+                    if selected_variable in ["education"] :
+                     st.write("Il n'est pas possible d'établir un lien clair entre la balance de ces clients et leur niveau d'éducation.")
+                elif selected_variable == "marital status":
+                    marital_variables = ["marital_married", "marital_single", "marital_divorced"]
+                    fig, axes = plt.subplots(3, 1, figsize=(10, 18))
+                    for i, variable in enumerate(marital_variables):
+                        shap.dependence_plot(
+                            "balance", shap_XGBOOST_1_VALUES, X_test_original_figures, 
+                            interaction_index=variable, show=False, ax=axes[i]
+                        )
+                        axes[i].set_title(f'Balance x {variable}', fontsize=14)
+                        axes[i].axhline(0, color='red', linewidth=1, linestyle='--')
+                        axes[i].set_xlim(300, 800)  
+                        xticks = range(300, 801, 100)  
+                        axes[i].set_xticks(xticks)
+                    plt.tight_layout()
+                    st.pyplot(fig)
+                    plt.close()
+                    st.write("Il n'est pas non plus possible d'établir un lien clair entre la balance de ces clients et leur statut marital.")
+                elif selected_variable == "job":
+                    job_variables = ['job_admin.', 'job_blue-collar', 'job_entrepreneur', 'job_housemaid', 'job_management', 
+                                     'job_retired', 'job_self-employed', 'job_services', 'job_student', 'job_technician', 'job_unemployed']
+                    fig, axes = plt.subplots(len(job_variables), 1, figsize=(10, len(job_variables) * 6))
+                    for i, variable in enumerate(job_variables):
+                        shap.dependence_plot(
+                            "balance", shap_XGBOOST_1_VALUES, X_test_original_figures, 
+                            interaction_index=variable, show=False, ax=axes[i]
+                        )
+                        axes[i].set_title(f'Balance x {variable}', fontsize=14)
+                        axes[i].axhline(0, color='red', linewidth=1, linestyle='--')
+                        axes[i].set_xlim(300, 800)  
+                        xticks = range(300, 801, 100)  
+                        axes[i].set_xticks(xticks) 
+                    plt.tight_layout()
+                    st.pyplot(fig)
+                    plt.close()
+                    st.write("Il en est de même pour la variable job.")
+            if submenu_local == "AGE" :
+                st.title("ÂGE : POIDS +0.23")
+                st.subheader("IMPACT POSITIF CHEZ LES JEUNES ET LES PLUS ÂGÉS")
+                st.subheader("IMPACT NÉGATIF DES TRANCHES D'ÂGES MOYENNES")
+                st.write("L'âge joue un rôle significatif dans l'orientation des prédictions. Valeurs comprises entre 18 et 74 ans.")
+                fig = plt.figure()
+                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("age")]], 
+                                  X_test_sd[["age"]], 
+                                  feature_names=["age"], 
+                                  show=True)
+                st.pyplot(fig)
+                st.write("Ce summary plot montre assez clairement qu'une **majorité de 'violet' soit des âges intermédiaires présentent des shap values négatives, ils ont donc tendance à ne pas souscrire au dépôt à terme.**")         
+                st.write("Pour une meilleure représentation de la distribution de la variable âge, affichons son dépendance plot.")
+                feature_name = "age"
+                fig, ax = plt.subplots(figsize=(20, 7))
+                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
+                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
+                fig = plt.gcf()  
+                ax.set_xlim(17, 76)
+                ax.set_xticks(np.arange(17, 77, 1))
+                ax.axhline(0, color='red', linewidth=1.5, linestyle='--')
+                st.pyplot(fig)       
+                plt.close()
+                st.write("Le graphique en U confirme que **les souscriptions au dépôt à terme concernent principalement des clients jeunes (18-28 ans) ou des clients plus âgés (59 ans et plus)**, tandis que les clients d'un âge intermédiaire (29-59 ans) sont majoritairement associés à des valeurs SHAP négatives, ceux-ci ont tendance à ne pas souscrire.") 
+            if submenu_local == "PREVIOUS" :
+                st.title("PREVIOUS : POIDS +0.22")
+                st.subheader("IMPACT POSITIF DE PREVIOUS SUR LA CLASSE 1")
+                st.write("Le nombre de contacts effectués avant la campagne avec le client semble également jouer un rôle important dans la prédiction. Valeurs comprises entre 0 et 2 fois.")
+                fig = plt.figure()
+                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("previous")]], 
+                                  X_test_sd[["previous"]], 
+                                  feature_names=["previous"], 
+                                  show=True)
+                st.pyplot(fig)
+                st.markdown("**Les clients ayant eu des interactions avec la banque par le passé** ont une **probabilité plus élevée d'appartenir à la classe 'YES'.**")
+                feature_name = "previous"
+                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
+                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
+                fig = plt.gcf()          
+                st.pyplot(fig)       
+                plt.close() 
+                st.write("La distribution des valeurs de previous montre très clairement que lorsque les clients n'ont jamais été contactés (previous = 0) alors la shap value est négative, tandis que **les clients qui ont été contactés par le passé affichent des valeurs shap très nettement positives, ils sont donc plus susceptibles de souscrire au produit.**")
+            if submenu_local == "CAMPAIGN" :
+                st.title("CAMPAIGN : POIDS +0.10")
+                st.subheader("IMPACT POSITIF DE PREVIOUS SUR LA CLASSE 1")
+                st.write("Le nombre de contacts effectués avec le client pendant la campagne (dernier contact inclus) est également un paramètre relativement important dans la prédiction de notre modèle. Valeurs comprises entre 1 et 5.")
+                fig = plt.figure()
+                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("campaign")]], 
+                                  X_test_sd[["campaign"]], 
+                                  feature_names=["campaign"], 
+                                  show=True)
+                st.pyplot(fig)
+                st.write("Bien que cette variable ait un impact relativement faible, elle reste positive dans notre modèle. Il semble que plus le nombre de contacts avec le client pendant la campagne est élevé (points violets et rouges), plus cela a un effet négatif sur la prédiction : un nombre élevé d'appels semble entraîner un échec à convaincre le client à souscrire au produit.")
+                feature_name = "campaign"
+                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
+                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
+                fig = plt.gcf()          
+                st.pyplot(fig)       
+                plt.close() 
+                st.write("Ce graphique montre clairement que **les clients qui n'ont été contactés qu'une seule fois affichent très majoritairement des SHAP values positives.**")
+            if submenu_local == "EDUCATION" :
+                st.title("EDUCATION : POIDS +0.09")
+                st.subheader("IMPACT POSITIF DE ÉDUCATION SUR LA CLASSE 1")
+                st.write("Il est clair que les clients ayant un niveau d'éducation élévé ont davantage tendance à souscrire au dépôt à terme.")
+                fig = plt.figure()
+                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("education")]], 
+                                  X_test_sd[["education"]], 
+                                  feature_names=["education"], 
+                                  show=True)
+                st.pyplot(fig)
+                st.write("Cela est confirmé par le dependence plot.")         
+                feature_name = "education"
+                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
+                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
+                fig = plt.gcf()          
+                st.pyplot(fig)       
+                plt.close() 
+            if submenu_local == "AUTRES" :
+                st.subheader("Loan")
+                fig = plt.figure()
+                shap.summary_plot(shap_values_XGBOOST_1[:, [X_test_sd.columns.get_loc("loan")]], 
+                                  X_test_sd[["loan"]], 
+                                  feature_names=["loan"], 
+                                  show=True)
+                st.pyplot(fig)
+                st.write("Si le client ne possède **pas de crédit personnel**, les prédictions tendent clairement vers le **'YES'**.")         
+                st.write("__________________________________")
+                st.subheader("Marital status")
+                marital_columns = [col for col in X_test_sd.columns if 'marital' in col]
+                marital_indices = [X_test_sd.columns.get_loc(col) for col in marital_columns]
+                shap_values_marital = shap_values_XGBOOST_1[:, marital_indices]
+                fig = plt.figure()
+                shap.summary_plot(shap_values_marital, 
+                                  X_test_sd.iloc[:, marital_indices], 
+                                  feature_names=marital_columns, 
+                                  show=False)
+                st.pyplot(fig)
+                plt.close()
+                st.markdown("Si le client n'est **pas marié**, les prédictions tendent vers le **'YES'.**  \n                Si le client est **célibataire ou divorcé**, les prédictions tendent globalement plutôt vers le **'YES'**.")
+                st.write("__________________________________")
+                st.subheader("Poutcome")
+                poutcome_columns = [col for col in X_test_sd.columns if 'poutcome' in col]
+                poutcome_indices = [X_test_sd.columns.get_loc(col) for col in poutcome_columns]
+                shap_values_poutcome = shap_values_XGBOOST_1[:, poutcome_indices]
+                fig = plt.figure()
+                shap.summary_plot(shap_values_poutcome, 
+                                  X_test_sd.iloc[:, poutcome_indices], 
+                                  feature_names=poutcome_columns, 
+                                  show=False)
+                st.pyplot(fig)
+                plt.close()
+                st.write("Si le résultat de la **précédente campagne** a été un **succès**, les prédictions tendent plutôt vers le **'YES'**.")     
+                st.write("__________________________________")
+                st.subheader("Job")
+                job_columns = [col for col in X_test_sd.columns if 'job' in col]
+                job_indices = [X_test_sd.columns.get_loc(col) for col in job_columns]
+                shap_values_job = shap_values_XGBOOST_1[:, job_indices]
+                fig = plt.figure()
+                shap.summary_plot(shap_values_job, 
+                                  X_test_sd.iloc[:, job_indices], 
+                                  feature_names=job_columns, 
+                                  show=False)
+                st.pyplot(fig)
+                plt.close()
+                st.write("Si le client est **édudiant**, **sans emploi**, **retraité** ou si son **job** est dans les **services**, alors les prédictions tendent assez clairement vers le **'YES'**.")     
+                st.write("__________________________________")
+                st.subheader("Client_Category")
+                feature_name = "Client_Category_M"
+                shap.dependence_plot(feature_name, shap_values=shap_XGBOOST_1_VALUES, features=X_test_original_figures, interaction_index=feature_name, show=False)
+                plt.axhline(0, color='red', linestyle='--', linewidth=1) 
+                fig = plt.gcf()          
+                st.pyplot(fig)       
+                plt.close() 
+                st.write("Si le **dernier contact avec le client** remonte à **moins de 6 mois**, les prédictions tendent majoritairement vers le **'YES'**.")          
 
 if selected == 'Recommandations & Perspectives':
     st.title("Recommandations & Perspectives")
