@@ -1,0 +1,14 @@
+[server]
+# Disable file watching to avoid inotify limit issues
+fileWatcherType = "none"
+
+[browser]
+# Disable usage stats collection
+gatherUsageStats = false
+
+[theme]
+# Optional: Set a theme for the app
+primaryColor = "#FF6B6B"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#262730"
