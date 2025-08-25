@@ -1,3 +1,2 @@
-# System dependencies for the bank app
 python3-dev
 build-essential
